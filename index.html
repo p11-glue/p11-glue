@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>p11 glue</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link href="style.css" rel="stylesheet" type="text/css" media="screen" />
+</head>
+<body>
+<div id="header-wrapper">
+	<div id="header">
+		<div id="menu">
+			<ul>
+				<li><a href="http://www.freedesktop.org/" class="first">FreeDesktop.org</a></li>
+				<li><a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">Mailing List</a></li>
+				<li><a href="#">About</a></li>
+			</ul>
+		</div>
+		<!--
+		<div id="search">
+			<form method="get" action="">
+				<fieldset>
+					<input type="text" name="s" id="search-text" size="15" />
+					<input type="submit" id="search-submit" value="GO" />
+				</fieldset>
+			</form>
+		</div>
+		-->
+	</div>
+</div>
+<!-- end #header -->
+<!-- end #header-wrapper -->
+<div id="logo">
+	<h1><a href="#">p11-glue</a></h1>
+	<p><em>using PKCS#11 to unite crypto libraries</em></p>
+</div>
+<hr />
+<!-- end #logo -->
+<div id="page"><div id="page-bgtop">
+
+<div id="sidebar">
+<ul>
+	<li>
+		<h2>Project: p11-kit</h2>
+		<p>Provides a way to load and enumerate PKCS#11 modules. Provides
+		a standard configuration setup for installing PKCS#11 modules in such
+		a way that they're discoverable.</p>
+	</li>
+	<li>
+		<h2>Spec: Trust Assertions</h2>
+		<p>A trust assertion represents a single piece of information about the user's
+or system's trust preferences. These can be used to make consistent trust
+decisions.</p>
+	</li>
+</ul>
+</div>
+
+<div id="content">
+
+<h1>Introduction</h1>
+<p>This is an effort to use and promote PKCS#11 as glue between crypto
+libraries and security applications on the open source desktop.</p>
+
+<p><img src="images/p11-glue.jpg"></p>
+
+<p>On the desktop today we have a variety of technically excellent crypto
+libraries (such as NSS, GnuTLS, OpenSSL etc.) The diversity allows each to
+excel and progress in its area of focus. Applications choose to use different
+crypto libraries for all sorts of good reasons.</p>
+
+<p>Users suffer because the desktop lacks a consistent way to use certificates
+or keys with all the various applications. For example different applications
+look for their trust anchor certificates in different places, and configuring
+each application with a client certificate is a laborious task.</p>
+
+<p>Developers suffer because when an application needs to use security
+(like TLS), the application needs to provide support for all sorts of
+security configuration, certificate/key file locations, security exceptions,
+and so on. And so progress suffers because there's no foundation for consistent
+place to store security stuff on the desktop.</p>
+
+<p>PKCS#11 is a standard for accessing crypto objects like keys and certificates
+and performing cryptographic operations on them. It's often used together with
+smart cards.</p>
+
+<p>By using PKCS#11 to provide a pluggable way for crypto libraries and other
+software to access keys, certificate, and things like trust anchors, we can
+solve the above problems.</p>
+
+<h2>Project: p11-kit</h2>
+
+<p>Provides a way to load and enumerate PKCS#11 modules. Provides a standard
+configuration setup for installing PKCS#11 modules in such a way that they're
+discoverable.</p>
+
+<p>Also solves problems with coordinating the use of PKCS#11 by different
+components or libraries living in the same process.</p>
+
+<h2>Spec: Trust Assertions</h2>
+
+<p>A trust assertion represents a single piece of information about the user's
+or system's trust preferences. These can be used to make consistent trust
+decisions.<p>
+
+<p>There's a specification for how trust assertions work, and how they can
+be stored within PKCS#11.</p>
+
+<h2>Spec: PKCS#11 URIs</h2>
+
+<p>PKCS#11 URIs are a way to identify a certain crypto object that resides
+in a PKCS#11 module. These URIs can be used in configuration files, or when
+one application needs to refer another to a cryptographic object, like a key
+or a certificate.</p>
+
+</div>
+
+</div>
+<!-- end #page -->
+
+<div id="footer">
+	<p>Design by <a href="http://www.freecsstemplates.org/">Free CSS Templates</a>.</p>
+</div>
+
+</div>
+</body>
+</html>
