@@ -1,56 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!--
-Design by Free CSS Templates
-http://www.freecsstemplates.org
-Released for free under a Creative Commons Attribution 2.5 License
+{% extends "base.incl" %}
 
-Name       : Proofing 
-Description: A two-column, fixed-width design for 1024x768 screen resolutions.
-Version    : 1.0
-Released   : 20100216
+{% block title %}p11 glue{% endblock %}
 
--->
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<title>p11 glue</title>
-<meta name="keywords" content="" />
-<meta name="description" content="" />
-<link href="style.css" rel="stylesheet" type="text/css" media="screen" />
-</head>
-<body>
-<div id="header-wrapper">
-	<div id="header">
-		<div id="menu">
-			<ul>
-				<li><a href="http://www.freedesktop.org/" class="first">FreeDesktop.org</a></li>
-				<li><a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">Mailing List</a></li>
-				<li><a href="#">About</a></li>
-			</ul>
-		</div>
-		<!--
-		<div id="search">
-			<form method="get" action="">
-				<fieldset>
-					<input type="text" name="s" id="search-text" size="15" />
-					<input type="submit" id="search-submit" value="GO" />
-				</fieldset>
-			</form>
-		</div>
-		-->
-	</div>
-</div>
-<!-- end #header -->
-<!-- end #header-wrapper -->
-<div id="logo">
-	<h1><a href="#">p11-glue</a></h1>
-	<p><em>using PKCS#11 to unite crypto libraries</em></p>
-</div>
-<hr />
-<!-- end #logo -->
-<div id="page"><div id="page-bgtop">
-
-<div id="sidebar">
+{% block sidebar %}
 <ul>
 	<li>
 		<h2>Project: p11-kit</h2>
@@ -65,10 +17,9 @@ or system's trust preferences. These can be used to make consistent trust
 decisions.</p>
 	</li>
 </ul>
-</div>
+{% endblock %}
 
-<div id="content">
-
+{% block content %}
 <h1>Introduction</h1>
 <p>This is an effort to use and promote PKCS#11 as glue between crypto
 libraries and security applications on the open source desktop.</p>
@@ -124,15 +75,4 @@ in a PkCS#11 module. These URIs can be used in configuration files, or when
 one application needs to refer another to a cryptographic object, like a key
 or a certificate.</p>
 
-</div>
-
-</div>
-
-	<!-- end #page -->
-	<div id="footer">
-		<p>Copyright (c) 2008 Sitename.com. All rights reserved. Design by <a href="http://www.freecsstemplates.org/">Free CSS Templates</a>.</p>
-	</div>
-	<!-- end #footer -->
-</div>
-</body>
-</html>
+{% endblock %}
