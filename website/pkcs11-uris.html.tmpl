@@ -1,0 +1,29 @@
+{% extends "base.incl" %}
+
+{% block title %}PKCS#11 URIs{% endblock %}
+
+{% block content %}
+<h1>Spec: PKCS#11 URIs</h1>
+
+<p><a href="pkcs11-uris.html">PKCS#11 URIs</a> are a way to identify a certain
+crypto object that resides in a PKCS#11 module. These URIs can be used in
+configuration files, or when one application needs to refer another to a
+cryptographic object, like a key or a certificate.</p>
+
+<p>A PKCS#11 URI looks like:</p>
+
+<pre>
+pkcs11:token=The%20Software%20PKCS#11%20softtoken;object=my-certificate;
+	objecttype=cert;id=%69%95%3e%5c%f4%bd%ec%91
+</pre>
+
+
+<h2>Specification</h2>
+
+<ul>
+	<li>An IETF RFC Draft: <a href="http://tools.ietf.org/html/draft-pechanec-pkcs11uri-03">draft-pechanec-pkcs11uri</a></li>
+	<li>Discussion: <a href="https://www.ietf.org/mailman/listinfo/saag">saag@ietf.org</a></li>
+	<li>Authors: J. Pechanec, D. Moffat</li>
+</ul>
+
+{% endblock %}
