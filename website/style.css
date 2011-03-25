@@ -335,9 +335,10 @@ hr { display: none; }
 
 #sidebar {
 	float: right;
-	width: 220px;
+	width: 250px;
 	font-family: Verdana, Arial, 'Bitstream Vera Sans', Helvetica, sans-serif;
 	font-size: 12px;
+	padding-left: 20px;
 }
 
 #sidebar ul {
@@ -348,8 +349,8 @@ hr { display: none; }
 }
 
 #sidebar li {
-	margin-bottom: 30px;
-	padding: 0 0 10px 0px;
+	margin-bottom: 10px;
+	padding: 0 0 5px 0px;
 }
 
 #sidebar li ul {
@@ -373,13 +374,12 @@ hr { display: none; }
 
 #sidebar p {
 	margin: 0;
-	padding: 0px 14px;
-	border-left: 5px solid #E0E0E0;
+	padding: 0px 0px 0px 19px;
 }
 
 #sidebar h2 {
 	height: 30px;
-	margin: 0 0 10px 0px;
+	margin: 0 0 5px 0px;
 	padding: 6px 0 2px 0px;
 	text-transform: capitalize;
 	font-size: 18px;
@@ -477,4 +477,8 @@ hr { display: none; }
 }
 
 #footer a {
+}
+
+br.clear {
+	clear: both;
 }

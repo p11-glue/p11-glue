@@ -17,6 +17,20 @@ pkcs11:token=The%20Software%20PKCS#11%20softtoken;object=my-certificate;
 	objecttype=cert;id=%69%95%3e%5c%f4%bd%ec%91
 </pre>
 
+<h2>Implementations and Integration</h2>
+
+<ul>
+	<li><a href="http://www.gnu.org/software/gnutls/">GnuTLS</a>:
+		<a href="http://www.gnu.org/software/gnutls/manual/gnutls.html#PKCS-_002311-tokens">Used to lookup</a>
+		certificate and key objects.
+	<li><a href="http://people.collabora.co.uk/~stefw/gck-docs/">Gck library</a>: API for
+		<a href="http://people.collabora.co.uk/~stefw/gck-docs/gck-PKCS11-URIs.html">parsing and building</a>
+		PKCS#11 URIs</li>
+	<li><a href="p11-kit.html">p11-kit</a>: Used in configuration. Also has API for parsing and building
+		PKCS#11 URIs</li>
+	<li><a href="p11-kit.html">p11-kit</a>: Used in configuration. Also has API for parsing and building
+		PKCS#11 URIs</li>
+</ul>
 
 <h2>Specification</h2>
 

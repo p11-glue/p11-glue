@@ -12,6 +12,21 @@ discoverable.</p>
 <p>Also solves problems with coordinating the use of PKCS#11 by different
 components or libraries living in the same process.</p>
 
+<h2>Implementations and Integration</h2>
+
+<ul>
+	<li>Drop in compatible with any application or library that can use
+		PKCS#11 modules. Some additional benefits are gained from
+		integrating directly.</li>
+	<li><a href="http://library.gnome.org/devel/glib/">Glib Library</a>
+		<a href="xxx">GTlsDatabase PKCS#11 database</a>: Will use p11-kit to load PKCS#11 modules, and
+		load configuration (In progress).</li>
+	<li><a href="http://people.collabora.co.uk/~stefw/gck-docs/">Gck Library</a>: Use p11-kit to load
+		and enumerate PKCS#11 modules. Use p11-kit to parse PKCS#11 URIs (In progress).</li>
+	<li><a href="http://people.collabora.co.uk/~stefw/gcr-docs/">Gcr Library</a>: Use p11-kit to load
+		configuration for looking up and storing trust assertions (In progress).</li>
+</ul>
+
 <h2>Source Repository</h2>
 
 <p>The source code is available via git.</p>

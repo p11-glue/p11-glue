@@ -12,6 +12,14 @@ decisions.<p>
 <p><a href="/doc/pkcs11-trust-assertions">There's a specification</a> for how
 trust assertions work, and how they can be stored within PKCS#11.</p>
 
+<p>NSS uses similar method of storing trust information, called
+<a href="https://developer.mozilla.org/en/NSS/PKCS_%2311_Netscape_Trust">Trust Objects</a>,
+which were studied as part of this research. But they had too many drawbacks to
+make them the candidate for adoption as a 'glue' mechanism.</p>
+
+<p>However implementors of trust assertions can easily support NSS-style trust
+objects at the same time. Gnome Keyring for example does this.</p>
+
 <h2>Documentation</h2>
 
 <ul>
@@ -19,6 +27,7 @@ trust assertions work, and how they can be stored within PKCS#11.</p>
 	<li>Header: <a href="/doc/pkcs11-trust-assertions/pkcs11-trust-assertions.h">pkcs11-trust-assertions.h</a></li>
 	<li>Talk by Stef Walter: <a href="#">Video</a> |
 		<a href="https://www.opensc-project.org/opensc/attachment/wiki/FOSDEM2011/trust-assertion-notes.ps">Slides</a></li>
+</ul>
 
 <h2>Source Repository</h2>
 
@@ -27,6 +36,26 @@ trust assertions work, and how they can be stored within PKCS#11.</p>
 <pre>
 $ git clone git://anongit.freedesktop.org/p11-glue/pkcs11-trust-assertions
 </pre>
+
+<h2>Implementations and Integration</h2>
+
+<ul>
+	<li><a href="http://live.gnome.org/GnomeKeyring">Gnome Keyring's</a>
+		<a href="http://git.gnome.org/browse/gnome-keyring/tree/pkcs11/xdg-store">xdg-store module</a>:
+		Storage trust assertions via PKCS#11.</li>
+	<li><a href="http://people.collabora.co.uk/~stefw/gcr-docs/">Gcr library</a>
+		<a href="http://people.collabora.co.uk/~stefw/gcr-docs/gcr-Trust-Storage-and-Lookups.html">trust lookup/store functions</a>:
+		Helper functions for storing and looking up trust assertions via PKCS#11.</li>
+	<li><a href="http://library.gnome.org/devel/glib/">Glib Library</a>
+		<a href="xxx">GTlsDatabase PKCS#11 database</a>:
+		Will use trust assertions to lookup root anchor certificates, and pinned certificates (In progress).</li>
+	<li><a href="http://live.gnome.org/Empathy">Empathy</a>:
+		Uses trust assertions to lookup trust anchor certificates, and store pinned certificates.</li>
+	<li><a href="revocation-cache.html">CRL PKCS#11 Module</a>: (Planned)
+		</li>
+	<li><a href="system module.html">System Certificates Module</a>: (Planned)
+		</li>
+</ul>
 
 <h2>Contributing</h2>
 

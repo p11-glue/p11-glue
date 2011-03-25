@@ -1,0 +1,46 @@
+{% extends "base.incl" %}
+
+{% block title %}Common Revocation Lists{% endblock %}
+
+{% block content %}
+<h1>Project: Common Revocation Lists</h1>
+
+<p>This is a PKCS#11 module that will expose a cache of CRLs as
+<a href="trust-assertions.html">trust assertions</a> to libraries and
+applications. Additionally there will be a daemon component to update the
+the CRL cache as required or configured.</p>
+
+<p>Rather than each application or library downloading and caching their own
+copy of the CRLs, this module and accompanying daemon, keeps track of and
+updates CRLs. Applications then access this information in a consistent
+manner.</p>
+
+<p>This CRL support is complementary to OSCP support. OSCP is used for immediate
+lookups of revocation information. Applications and libraries also need a way to
+cache revocation information long term. CRLs provide this. But without a
+coordinated cache, it's too cumbersome for every application to provide a way to
+fetch, store, and manage these CRLs. This module provides that coordinated
+cache.</p>
+
+<h2>Documentation</h2>
+
+<p>Still in proposal/conceptual stages.</p>
+
+<h2>Source Repository</h2>
+
+<p>No source available yet.</p>
+
+<h2>Implementations and Integration</h2>
+
+<p>Still being planned.</p>
+
+<h2>Contributing</h2>
+
+<ul>
+	<li>Mailing list:
+		<a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</a></li>
+	<li>Bugs:
+		<a href="https://bugs.freedesktop.org/enter_bug.cgi?product=p11-glue">bugs.freedesktop.org</a></li>
+</ul>
+
+{% endblock %}
