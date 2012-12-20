@@ -5,7 +5,7 @@
 	<title>Storing Trust Assertions in PKCS#11 Modules</title>
 
 	<articleinfo>
-		<releaseinfo>Rough "rougher than burlap underwear" draft</releaseinfo>
+		<releaseinfo>This document has been retired.</releaseinfo>
 		<date>December 2010</date>
 		<authorgroup>
 			<author>
@@ -20,6 +20,19 @@
 			</author>
 		</authorgroup>
 	</articleinfo>
+
+	<section id="status">
+		<title>Status of This Document</title>
+
+		<para>This document has been retired. Although the concepts herein worked,
+			they were not compelling enough to be used as a common means of
+			sharing trust information. In particular this document shared
+			deficiencies with prior solutions it was meant to replace.</para>
+
+		<para>Further work on this topic continues under the
+			<ulink url="http://p11-glue.freedesktop.org/doc/sharing-trust-policy/">Sharing Trust Policy</ulink> specification, including the concept of
+			Stapled Certificate Extensions.</para>
+	</section>
 
 	<section id="introduction">
 		<title>Introduction</title>
