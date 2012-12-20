@@ -2,6 +2,9 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 ]>
 <article>
+
+<!-- RETIRED: SEE DETAILS BELOW -->
+
 	<title>Storing Trust Assertions in PKCS#11 Modules</title>
 
 	<articleinfo>
