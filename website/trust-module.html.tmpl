@@ -1,0 +1,89 @@
+{% extends "base.incl" %}
+
+{% block title %}Trust Storage Module{% endblock %}
+
+{% block content %}
+<h1>Project: Trust Storage Module</h1>
+
+<p>This is a PKCS#11 module that exposes read-only storage of system
+certificates and trust policy. It loads the certificates and trust
+storage from a directory of files.</p>
+
+<p>Crypto libraries are able to use this as a shared source of certificate
+authority anchors, black lists, and other locally stored system trust policy.</p>
+
+<p>There is work going on to define a comprehensive representation of
+this <a href="sharing-trust-policy.html">shared trust policy</a>. Once such a
+solution matures we hope to implement it in this PKCS#11 trust storage module.</p>
+
+<p>Also included will be a tool that can be used to extract certificates in
+various formats for crypto libraries not (or not yet) able to read from this
+PKCS#11 trust module directly.</p>
+
+<p>A goal is to have minimal dependencies, and be crypto library agnostic so this
+can be used by any library or app. Accesses information owned by root and configured
+by a system administrator or distro creator. These PKCS#11 objects are read-only
+and so don't need to go through a coordinating daemon. Thus we can implement an
+efficient, reliable lookup for these system certs and other objects, with less
+moving parts.</p>
+
+<h2>Source Repository</h2>
+
+<p>So far <a href="http://cgit.freedesktop.org/p11-glue/p11-kit/log/?h=trust">the code</a>
+lives in the <tt>trust</tt> branch of the <tt>p11-kit</tt> repository:</p>
+
+<pre>
+$ git clone git://anongit.freedesktop.org/p11-glue/p11-kit
+$ cd p11-kit
+$ git checkout trust
+</pre>
+
+<h2>Status</h2>
+
+<p>An initial implementation of the module is available, and you can try it out. A dependency
+on libtasn1-devel is required to build the PKCS#11 trust module.</p>
+
+<pre>
+$ sh autogen.sh --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib64 --enable-debug \
+	--with-system-anchors=/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/anchors
+$ make
+$ sudo make install
+$ sudo mv -v /usr/lib64/libnssckbi.so /opt/libnssckbi.so.orig-nss
+$ sudo ln -sv pkcs11/p11-kit-trust.so /usr/lib64/libnssckbi.so
+</pre>
+
+<p>Now place some certificates in the <tt>--with-system-anchors</tt> location(s).
+Right now, as input, you can use DER, PEM or OpenSSL style 'trusted
+certificates'.</p>
+
+<p>For example you can tweak some trust policy bits like so:</p>
+
+<pre>
+$ openssl x509 -addtrust serverAuth -addreject clientAuth \
+	-in /path/to/my-ca.pem -out /etc/pki/tls/certs/anchors/my-ca.pem
+</pre>
+
+<p>Now you can run apps like Firefox and see the certificates appear in the
+Certificate manager and are trusted as appropriate. You can use a command like
+this to see some debug output:</p>
+
+<pre>
+$ P11_KIT_DEBUG=all firefox
+</pre>
+
+<p>The extraction tool is not yet ready.</p>
+
+<h2>Documentation</h2>
+
+<p>Still in proposal/conceptual stages.</p>
+
+<h2>Contributing</h2>
+
+<ul>
+	<li>Mailing list:
+		<a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</a></li>
+	<li>Bugs:
+		<a href="https://bugs.freedesktop.org/enter_bug.cgi?product=p11-glue">bugs.freedesktop.org</a></li>
+</ul>
+
+{% endblock %}

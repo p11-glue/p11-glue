@@ -5,40 +5,6 @@
 {% block content %}
 <h1>Project: System Storage Module</h1>
 
-<p>This is a PKCS#11 module that will expose read-only storage of
-<a href="trust-assertions.html">trust assertions</a>, certificates and other
-objects to libraries and applications.</p>
-
-<p>The typical use case for this module is easy access to the system configured
-trusted root anchor certificates. Currently some other PKCS#11 modules already
-provide access to system certificates and trust assertions. But they do this
-in a desktop specific manner, for example Gnome Keyring.</p>
-
-<p>Coded in plain C so that it can be integrated into any library or app.
-Accesses information owned by root and configured by a system administrator
-or distro creator. These PKCS#11 objects are read-only and so don't need to go
-through a coordinating daemon. Thus we can implement an efficient, reliable
-lookup for these system certs and other objects, with less moving parts.</p>
-
-<h2>Documentation</h2>
-
-<p>Still in proposal/conceptual stages.</p>
-
-<h2>Source Repository</h2>
-
-<p>No source available yet.</p>
-
-<h2>Implementations and Integration</h2>
-
-<p>Still being planned.</p>
-
-<h2>Contributing</h2>
-
-<ul>
-	<li>Mailing list:
-		<a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</a></li>
-	<li>Bugs:
-		<a href="https://bugs.freedesktop.org/enter_bug.cgi?product=p11-glue">bugs.freedesktop.org</a></li>
-</ul>
+<p>This has been renamed the <a href="trust-module.html">Trust Storage Module</a>.</p>
 
 {% endblock %}
