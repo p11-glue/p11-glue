@@ -21,19 +21,17 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 -->
 
-    <xsl:import href="http://docbook.sourceforge.net/release/xsl/current/xhtml/chunk.xsl"/>
-
-    <xsl:param name="toc.max.depth">3</xsl:param>
-    <xsl:param name="generate.section.toc.level">0</xsl:param>
-    <xsl:param name="generate.toc">
-        book     toc
-        part     nop
-        chapter  toc
-    </xsl:param>
-    <xsl:param name="html.stylesheet">style.css</xsl:param>
-    <xsl:param name="funcsynopsis.style">ansi</xsl:param>
-    <xsl:param name="funcsynopsis.decoration">1</xsl:param>
-    <xsl:param name="refentry.generate.name">0</xsl:param>
-    <xsl:param name="refentry.generate.title">1</xsl:param>
+<!--	<xsl:param name="generate.toc">
+		book     toc
+		part     nop
+		chapter  toc
+		sect1    toc
+		sect2    toc
+		sect3    toc
+	</xsl:param>-->
+	<xsl:param name="html.stylesheet">style.css</xsl:param>
+	<xsl:param name="refentry.generate.name">0</xsl:param>
+	<xsl:param name="refentry.generate.title">1</xsl:param>
+	<xsl:param name="section.autolabel">1</xsl:param>
 
 </xsl:stylesheet>

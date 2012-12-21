@@ -21,7 +21,7 @@
 	</authorgroup>
 </articleinfo>
 
-<section id="status">
+<sect1 id="status">
 	<title>Status of This Document</title>
 
 	<para>This document is in a state of construction. I applaud those who wish to join
@@ -32,9 +32,9 @@
 	<para>The 
 		<ulink url="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org mailing list</ulink>
 		is the preferred venue for discussion.</para>
-</section>
+</sect1>
 
-<section id="introduction">
+<sect1 id="introduction">
 	<title>Introduction</title>
 
 	<para>Various crypto libraries have various ways to represent and store information
@@ -63,18 +63,23 @@
 		the scope of this document. This document does not conflict with such a 
 		theoretical effort.</para>
 
+	<para>By using consistent anchors and other trust information, crypto libraries
+		can make consistent decisions about X.509 certificates.</para>
+
+</sect1>
+
+<sect1 id="background">
+	<title>Concepts</title>
+	<para>Since the words used with these topics are often heavily overloaded and
+		some concepts are discussed here.</para>
+
 	<para>A word on terminology. We use the word <emphasis>trust</emphasis> quite a bit
 		in this document. This is a highly overloaded and subjective term, and its use
 		in this specification is unfortunate. An unambiguous term is desirable.
 		The author cringes every time the word <emphasis>trust</emphasis> is used.
 		The author cringed a lot while writing this document.</para>
 
-	<para>By using consistent anchors and other trust information, crypto libraries
-		can make consistent decisions about X.509 certificates.</para>
-
-</section>
-
-<section id="anchors">
+<sect2 id="anchors">
 	<title>About Anchors and Trust Policy</title>
 
 	<para>X.509 is structured around the concept of having a chain of certificates, each
@@ -119,9 +124,9 @@
 		policy. Various crypto libraries have various of representing this out-of-band
 		trust policy, and we examine them below. This document wishes to define
 		such a standard.</para>
-</section>
+</sect2>
 
-<section id="blacklists">
+<sect2 id="blacklists">
 	<title>About Black Lists and Revocation</title>
 
 	<para>As designed, when an X.509 certificate is compromised, either through malice
@@ -140,9 +145,9 @@
 	<para>On Linux there has been no standard way to represent blacklists. Various
 		crypto libraries have various means of representing them, and we examine
 		them below. This document wishes to define a such a standard.</para>
-</section>
+</sect2>
 
-<section id="pinned-certificates">
+<sect2 id="pinned-certificates">
 	<title>About Pinned Certificates</title>
 
 	<para>Pinned certificates are a concept discussed in RFC 6125. During configuration
@@ -158,9 +163,11 @@
 		itself and verifies irrespective of it's signature (eg: self-signed).
 		This is not equivalent to anchoring it as a certificate authority, where
 		it could anchor an entire certificate chain.</para>
-</section>
+</sect2>
 
-<section id="existing">
+</sect1>
+
+<sect1 id="existing">
 	<title>Existing Representations of Trust Policy</title>
 
 	<para>Obviously if a comprehensive, future-proof and realistic standard
@@ -169,7 +176,7 @@
 		examine	the various representations in use, and why they are insufficient
 		to provide such a comprehensive standard.</para>
 
-	<section id="nss-trust-objects">
+	<sect2 id="nss-trust-objects">
 		<title>NSS Trust Objects</title>
 
 		<para>Internally NSS represents out-of-band trust policy using PKCS#11
@@ -272,7 +279,7 @@
 		</varlistentry>
 		</variablelist>
 
-		<section id="nss-trust-problems">
+		<sect3 id="nss-trust-problems">
 			<title>Defficiencies</title>
 			<para>NSS trust objects have been around for nearly two decades. They
 				have been sufficient in the past but are showing their age.</para>
@@ -306,10 +313,10 @@
 				acceptable object model for representing out-of-band trust policy,
 				for a standard representation it cannot be the only one.</para></listitem>
 			</itemizedlist>
-		</section>
-	</section>
+		</sect3>
+	</sect2>
 
-	<section id="openssl-trusted">
+	<sect2 id="openssl-trusted">
 		<title>OpenSSL Trusted Certificates</title>
 		<para>OpenSSL contains a representation of out-of-band trust policy in its 
 			<emphasis>TRUSTED CERTIFIATE</emphasis> PEM blocks aka. CertAux.
@@ -346,7 +353,7 @@ CertAux ::= SEQUENCE {
 			ExtendedKeyUsage certificate extension. The other fields are
 			not related to trust policy.</para>
 
-		<section id="openssl-trusted-problems">
+		<sect3 id="openssl-trusted-problems">
 			<title>Deficiencies</title>
 
 			<para>This representation seems to be designed to solve a specific use
@@ -369,18 +376,18 @@ CertAux ::= SEQUENCE {
 				is awkward to parse especially when using a other and/or strict
 				DER parsers.</para></listitem>
 			</itemizedlist>
-		</section>
-	</section>
+		</sect3>
+	</sect2>
 
 
-	<section id="trust-assertions">
+	<sect2 id="trust-assertions">
 		<title>Trust Assertions</title>
 
 		<para>Trust Assertions are the author's previous attempt to solve the problem of sharing
 			trust policy information. Details about this are available online
 				<footnote><para><ulink url="http://p11-glue.freedesktop.org/doc/pkcs11-trust-assertions/">Storing Trust Assertions in PKCS#11 Modules</ulink></para></footnote>.</para>
 
-		<section id="trust-assertion-problems">
+		<sect3 id="trust-assertion-problems">
 			<title>Deficiencies</title>
 
 			<para>Although claiming to solve the problem of out-of-band trust policy
@@ -403,10 +410,10 @@ CertAux ::= SEQUENCE {
 			<para>In addition claims of extensibility and generality proved hard
 				to implement in the real world, and trust assertions ended up
 				as a far more constrained concept that initially envisioned.</para>
-		</section>
-	</section>
+		</sect3>
+	</sect2>
 
-	<section id="ca-bundles">
+	<sect2 id="ca-bundles">
 		<title>Certificate Authority Bundles</title>
 
 		<para>A bundle is either a file or directory containing one or more X.509
@@ -416,7 +423,7 @@ CertAux ::= SEQUENCE {
 		<para>They are usually stored in the OpenSSL PEM format, but may also be
 			seen in the Java Keystore format, and others.</para>
 
-		<section id="ca-bundle-problems">
+		<sect3 id="ca-bundle-problems">
 			<title>Deficiencies</title>
 
 			<para>Although widely used today certificate authority bundles have
@@ -440,11 +447,11 @@ CertAux ::= SEQUENCE {
 				has the effect of trusting it for any peer, and as a certificate
 				authority.</para></listitem>
 			</itemizedlist>
-		</section>
-	</section>
-</section>
+		</sect3>
+	</sect2>
+</sect1>
 
-<section id="stapled-certificate-extensions">
+<sect1 id="stapled-certificate-extensions">
 	<title>Stapled Certificate Extensions</title>
 
 	<para>Over the years there have been many ways that trust policy, anchors and
@@ -481,9 +488,9 @@ CertAux ::= SEQUENCE {
 		interface storing stapled certificate extensions to merge certain
 		extensions in some way. However that is out of the scope of this
 		document.</para>
-</section>
+</sect1>
 
-<section id="local-stores">
+<sect1 id="local-stores">
 	<title>Conceptual Local Store</title>
 
 	<para>The local store is referred to in the document below. It stores certificates
@@ -506,16 +513,16 @@ CertAux ::= SEQUENCE {
 		using a stapled certificate extension, by constraining the certificate so
 		that there is no valid usage. Implementors may choose to do this as a
 		compatibility measure if necessary (see below).</para>
-</section>
+</sect1>
 
-<section id="how">
+<sect1 id="how">
 	<title>Representing Trust Policy</title>
 
 	<para>Before going into details of how stapled certificate extensions are
 		stored or used by applications, we will attempt to show that they
 		can be used to model all the various use of out of band trust policy.</para>
 
-	<section id="how-anchors">
+	<sect2 id="how-anchors">
 		<title>Representing Anchors</title>
 
 		<para>Presence of a certificate in the anchor store or anchor list is
@@ -532,9 +539,9 @@ CertAux ::= SEQUENCE {
 		<para>To change whether a certificate is an anchor or not, a
 			stapled BasicConstraints extension is added with the relevant
 			isCa and pathlen fields.</para>
-	</section>
+	</sect2>
 
-	<section id="how-constraining-usages">
+	<sect2 id="how-constraining-usages">
 		<title>Constraining Usages</title>
 	
 		<para>An ExtendedKeyUsage or KeyUsage stapled certificate extension may
@@ -544,17 +551,17 @@ CertAux ::= SEQUENCE {
 
 		<para>In combination with the above section, these stapled certificate extensions
 			may be used to constrain for what usages anchors can be used.</para>
-	</section>
+	</sect2>
 	
-	<section id="how-constraining-names">
+	<sect2 id="how-constraining-names">
 		<title>Constraining Names</title>
 
 		<para>A NameConstraints stapled certificate extension may be added to a
 			certificate when the system builder or administrator wishes to define
 			which end entity names can be signed by a given certificate.</para>
-	</section>
+	</sect2>
 	
-	<section id="how-blacklists">
+	<sect2 id="how-blacklists">
 		<title>Representing Blacklists</title>
 	
 		<para>Presence of a certificate in the black list is what makes a certificate
@@ -565,9 +572,9 @@ CertAux ::= SEQUENCE {
 			its usages with an ExtendedKeyUsage extension that contains no usages.
 			This is not the recommended approach. Implementors should instead place
 			the certificates on an explicit blacklist.</para>
-	</section>
+	</sect2>
 	
-	<section id="how-pinned-certificates">
+	<sect2 id="how-pinned-certificates">
 		<title>Representing Pinned Certificates</title>
 
 		<para>A certificate is pinned to a specific peer by adding a SubjectAltName
@@ -576,10 +583,10 @@ CertAux ::= SEQUENCE {
 		<para>If it is wished to make a pinned certificate also be an anchor (although
 			not necessarily a certificate authority anchor) then it can be placed
 			in the local anchor store.</para>
-	</section>
-</section>
+	</sect2>
+</sect1>
 
-<section id="asn1">
+<sect1 id="asn1">
 	<title>ASN.1 Data Format for Stored Certificates</title>
 
 	<para>This is a ASN.1 representation of a certificate stored with stapled certificate
@@ -623,9 +630,9 @@ StoredParameters ::= SEQUENCE {
 
 	<para>The reason field is used to mark a certificate as an anchor or put it on
 		the black list.</para>
-</section>
+</sect1>
 
-<section id="pkcs11">
+<sect1 id="pkcs11">
 	<title>PKCS#11 Extensions for Stapled Certificate Extensions</title>
 
 	<para><ulink url="http://www.cryptsoft.com/pkcs11doc/">PKCS#11</ulink> is a useful
@@ -681,9 +688,9 @@ StoredParameters ::= SEQUENCE {
 	</varlistentry>
 	</variablelist>
 
-</section>
+</sect1>
 
-<section id="using">
+<sect1 id="using">
 	<title>Validation using Stapled Certificate Extensions</title>
 
 	<para>Validation algorithms should retrieve the stapled certificate extensions
@@ -707,9 +714,9 @@ StoredParameters ::= SEQUENCE {
 	<para>Extensions are used for validation in the exactly the same way regardless
 		of whether they are stapled or present in the certificate itself. This
 		includes the critical field of extensions.</para>
-</section>
+</sect1>
 
-<section id="retrofitting">
+<sect1 id="retrofitting">
 	<title>Retrofitting Stapled Certificate Extensions</title>
 
 	<para>In the real world not all crypto libraries will be using stapled
@@ -739,9 +746,9 @@ StoredParameters ::= SEQUENCE {
 		underlying storage based on stapled certificate extensions. This will only
 		enforce the ExtendedKeyUsage extensions. Blacklists are enforced by rejecting all
 		usages.</para>
-</section>
+</sect1>
 
-<section id="outstantding-issues">
+<sect1 id="outstantding-issues">
 	<title>Known Outstanding Issues</title>
 
 	<para>While all aspects of this document should be reviewed or discussed, here
@@ -762,9 +769,9 @@ StoredParameters ::= SEQUENCE {
 			with no usages? This feels wrong, and like a hack, even though it works.</para>
 	</listitem>
 	</itemizedlist>
-</section>
+</sect1>
 
-<section id="implementations">
+<sect1 id="implementations">
 	<title>Implementations</title>
 
 	<para>Given sufficient discussion and discovery of defects, it is the author's goal
@@ -773,7 +780,7 @@ StoredParameters ::= SEQUENCE {
 
 	<para>In addition, contribute towards retrofitting various crypto libraries to use the
 		trust policy described here.</para>
-</section>
+</sect1>
 
 </article>
 
