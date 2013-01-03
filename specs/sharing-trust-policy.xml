@@ -785,6 +785,14 @@ StoredParameters ::= SEQUENCE {
 			on a constraining stapled certificate extension, such as ExtendedKeyUsage
 			with no usages? This feels wrong, and like a hack, even though it works.</para>
 	</listitem>
+	<listitem>
+		<para>Should we support certificate extensions stapled to raw public keys and not
+			just to certificates? What are the use cases? Should all stapled certificate
+			extensions be looked-up/associated using public keys? The black list use case
+			is pretty obvious, but how does the anchor model work when no certificate chain
+			is present? Are there relevant certificate extensions that when stapled to public
+			keys represent real world use cases?</para>
+	</listitem>
 	</itemizedlist>
 </sect1>
 
