@@ -47,8 +47,8 @@
 	<para>In this document we examine a general purpose method for storing anchor
 		certificates, and representing policy about them. We also look at blacklists
 		and their peculiarities. We see how we can represent these in a
-		coherent and future-proof manner. In addition to being an extensible concept,
-		it is relatively easy to implement and retrofit into existing code.</para>
+		coherent and future-proof manner. In addition to being extensible, the proposed concept
+		is relatively easy to implement and retrofit into existing code.</para>
 
 	<para>By using consistent anchors and other trust information, crypto libraries
 		can make consistent decisions about X.509 certificates.</para>
@@ -56,7 +56,7 @@
 	<sect2>
 		<title>Scope</title>
 
-		<para>We are dealing here with the anchor information and other trust policy
+		<para>We are dealing here with the anchors and other trust policy
 			information used by a validation algorithm. The algorithm itself lives
 			inside of a crypto library implementation. This trust policy information
 			can be viewed as input to the certificate validation algorithms.
@@ -96,10 +96,10 @@
 		when validating certificates. They do this in various ways.</para>
 
 	<para>At one end of a certificate chain is the <emphasis>end entity</emphasis>
-		certificate. The one that's being validated. At the other end of a valid
+		certificate, which is the certificate that is being validated. At the other end of a valid
 		certificate chain should be a trust anchor. This is a certificate
-		that is	trusted expcilitly either by the local system, either as a default
-		or the system has been configured to do so.</para>
+		that is	trusted explicitly by the local system, either by default
+		or by a deliberate configuration choice.</para>
 
 	<para>Anchors can have <emphasis>trust policy</emphasis>
 		<footnote><para>Note we use the term <emphasis>policy</emphasis> here rather
@@ -108,7 +108,7 @@
 			NameConstraints, PolicyConstraints, and so on.</para></footnote>
 		attached to them which define the situations
 		they can be used as anchors. This policy takes on many forms. A given
-		anchor might be only be relevant when verifying an end entity certificates
+		anchor might be only be relevant when verifying an end entity certificate
 		used for email. Another anchor might be relevant only for an end entity
 		certificate that has a Common Name under a certain subzone. There are many
 		such policies and combinations of them.</para>
@@ -135,16 +135,16 @@
 </sect2>
 
 <sect2 id="blacklists">
-	<title>About Black Lists and Revocation</title>
+	<title>About Blacklists and Revocation</title>
 
 	<para>As designed, when an X.509 certificate is compromised, either through malice
-		or accident, it is to be revoked. Verification algorithms check against 
+		or accident, it is supposed to be revoked. Verification algorithms check against
 		lists of revoked certificates published by certificate authorities in
 		standard ways.</para>
 
 	<para>When an Anchor certificate is revoked, or revocation needs to take place
 		independent of the certificate authority, such a certificate is added to
-		a black list.</para>
+		a blacklist.</para>
 
 	<para>Blacklists are distributed by system builders or administrators. They are
 		used as a supplement to the standard revocation lists, and dynamic protocols
@@ -288,11 +288,11 @@
 		</variablelist>
 
 		<sect3 id="nss-trust-problems">
-			<title>Defficiencies</title>
-			<para>NSS trust objects have been around for nearly two decades. They
+			<title>Deficiencies</title>
+			<para>NSS trust objects have been around for nearly two decades. They may
 				have been sufficient in the past but are showing their age.</para>
 
-			<para>These trust objects do not seem to be designed as a comprehensize
+			<para>These trust objects do not seem to be designed as a comprehensive
 				representation of out-of-band trust policy. They are insufficient
 				in the following ways:</para>
 
@@ -301,7 +301,7 @@
 				cryptographically broken in various ways
 					<footnote><para>Neither
 						<ulink url='http://tools.ietf.org/html/draft-turner-md5-seccon-update-07'>MD5</ulink>
-						or <ulink url='https://tools.ietf.org/html/draft-turner-sha0-sha1-seccon-00'>SHA1</ulink>
+						nor <ulink url='https://tools.ietf.org/html/draft-turner-sha0-sha1-seccon-00'>SHA1</ulink>
 						are currently recommended for use in specifications.</para></footnote>
 				.</para></listitem>
 			<listitem><para>Trust objects only support trust policy related to
@@ -327,7 +327,7 @@
 	<sect2 id="openssl-trusted">
 		<title>OpenSSL Trusted Certificates</title>
 		<para>OpenSSL contains a representation of out-of-band trust policy in its 
-			<emphasis>TRUSTED CERTIFIATE</emphasis> PEM blocks aka. CertAux.
+			<emphasis>TRUSTED CERTIFICATE</emphasis> PEM blocks aka. CertAux.
 			Files containing this information can be manipulated using 
 			its <command>openssl x509</command> tool.</para>
 
@@ -337,7 +337,7 @@
 		<para>PEM files contain a header and footer containing the words
 			<emphasis>TRUSTED CERTIFICATE</emphasis>. Contained in the PEM
 			data are two DER sequences. The first is an X.509 certificate,
-			and the latter is a structure known internally as X509_CERT_AUX.</para>
+			and the latter is a structure known internally as <literal>X509_CERT_AUX</literal>.</para>
 
 		<para>The X509_CERT_AUX DER sequence may be defined as follows:
 <programlisting>
@@ -365,7 +365,7 @@ CertAux ::= SEQUENCE {
 			<title>Deficiencies</title>
 
 			<para>This representation seems to be designed to solve a specific use
-				case, and not designed as a comprehensize way to represent
+				case, and not designed as a comprehensive way to represent
 				out-of-band trust policy.  It is insufficient in the following
 				ways:</para>
 
@@ -467,7 +467,7 @@ CertAux ::= SEQUENCE {
 		examined representations serve to comprehensively model trust policy.</para>
 
 	<para>X.509 certificate extensions usually define the ways that a certificate
-		can be used, can be used to represent trust policy. Usually these
+		can be used to represent trust policy. Usually these
 		certificate extensions are internal to the certificate, and are signed
 		by the key holder of the certificate.</para>
 
@@ -475,25 +475,25 @@ CertAux ::= SEQUENCE {
 		represent out-of-band trust policy, as defined by a system builder,
 		administrator or user.</para>
 
-	<para>We will refer to these additional extensions <emphasis>Stapled Certificate
+	<para>We will refer to these additional extensions as <emphasis>Stapled Certificate
 		Extensions</emphasis>.</para>
 
-	<para>When a stapled certificate extensions are present, they are used to be
+	<para>When stapled certificate extensions are present, they are used to be
 		used instead of the certificate extensions of the same OID in the
 		certificate itself. In this way stapled certificate extensions override
 		policy defined in the certificate.</para>
 
 	<para>This has the implication that if only one part of a certificate extension
 		needs to be adjusted by a stapled certificate extension, that entire
-		extension may be overridden. This is intentional. Each extension
+		extension will be overridden for that certificate. This is intentional. Each extension
 		that contains trust policy should be treated as a whole unit of trust
 		policy. This includes changing the critical field of an extension.
 		This is part of the whole.</para>
 
-	<para>There may not be more than one stapled certificate extension of a given
+	<para>For each certificate, there may not be more than one stapled certificate extension of a given
 		identifier or type. There is no way to automatically merge certificate
-		extensions. It may be possible for applications (such as a management)
-		interface storing stapled certificate extensions to merge certain
+		extensions. It may be possible for applications which store stapled
+		certificate extensions (such as a management interface) to merge certain
 		extensions in some way. However that is out of the scope of this
 		document.</para>
 </sect1>
@@ -504,20 +504,20 @@ CertAux ::= SEQUENCE {
 	<para>The local store is referred to in the document below. It stores certificates
 		and trust policy in the form of stapled certificate extensions.</para>
 
-	<para>In addition the store contains two lists. The anchor list containts
-		certificates that can be used as anchors. The black list contains
-		certificates that are black listed.</para>
+	<para>In addition the store contains two lists. The anchor list contains
+		certificates that can be used as anchors. The blacklist contains
+		certificates that are blacklisted.</para>
 
 	<para>These may not actually be implemented as lists, they may be implemented
 		as flags which can be used as filters during lookup. We refer to them
 		as lists for explanatory purposes.</para>
 
-	<para>It is intentional that the concept of anchors and black lists are not
+	<para>It is intentional that the concept of anchors and blacklists are not
 		implemented using stapled certificate extensions. These are overarching
 		concepts that transcend the fine tuning of policy which stapled
 		certificate extensions provide.</para>
 
-	<para>As we explore further below, it is possible to implement a black list
+	<para>As we explore further below, it is possible to implement a blacklist
 		using a stapled certificate extension, by constraining the certificate so
 		that there is no valid usage. Implementors may choose to do this as a
 		compatibility measure if necessary (see below).</para>
@@ -528,13 +528,13 @@ CertAux ::= SEQUENCE {
 
 	<para>Before going into details of how stapled certificate extensions are
 		stored or used by applications, we will attempt to show that they
-		can be used to model all the various use of out of band trust policy.</para>
+		can be used to model all the various uses of out of band trust policy.</para>
 
 	<sect2 id="how-anchors">
 		<title>Representing Anchors</title>
 
 		<para>Presence of a certificate in the anchor store or anchor list is
-			what makes a certificate usable as anchor. Such a store is an
+			what makes a certificate usable as an anchor. Such a store is an
 			abstract implementation specific concept, although we define
 			a standard implementations below.</para>
 
@@ -575,8 +575,8 @@ CertAux ::= SEQUENCE {
 	<sect2 id="how-blacklists">
 		<title>Representing Blacklists</title>
 
-		<para>Presence of a certificate in the black list is what makes a certificate
-			distrusted. Such a list is an abstract implementation specific concept,
+		<para>Presence of a certificate in the blacklist is what makes a certificate
+			distrusted. Such a list is an abstract implementation-specific concept,
 			although we define some standard implementations below.</para>
 
 		<para>Additionally it is possible to blacklist a certificate by constraining
@@ -602,7 +602,7 @@ CertAux ::= SEQUENCE {
 	<title>ASN.1 Data Format for Stored Certificates</title>
 
 	<para>This is a ASN.1 representation of a certificate stored with stapled certificate
-		extensions, as well as anchor and black list flags. It also includes a
+		extensions, as well as anchor and blacklist flags. It also includes a
 		friendlyName alias field as many of the other previous solutions do.</para>
 
 	<para>A set of these structures may form a rudimentary certificate store, although
@@ -641,7 +641,7 @@ StoredParameters ::= SEQUENCE {
 		should be defined using the stapledExtensions field.</para>
 
 	<para>The reason field is used to mark a certificate as an anchor or put it on
-		the black list.</para>
+		the blacklist.</para>
 </sect1>
 
 <sect1 id="pkcs11">
@@ -652,7 +652,7 @@ StoredParameters ::= SEQUENCE {
 		It is often used with smart cards.</para>
 
 	<para>Here we outline how to use PKCS#11 as a store of stapled certificate extensions,
-		anchors	and black listed certificates. We do this in the stardard PKCS#11
+		anchors	and blacklisted certificates. We do this in the stardard PKCS#11
 		object model, by defining a few extra attributes.</para>
 
 	<para>To make it clear which attributes are defined here and which are standard,
@@ -661,13 +661,13 @@ StoredParameters ::= SEQUENCE {
 
 	<para>The standard CKA_TRUSTED boolean attribute is used on an object with the 
 		class CKO_CERTIFICATE to mark it as an anchor. The presence of a
-		BasicConstraints certificate extension marks it as a certifiacte
+		BasicConstraints certificate extension marks it as a certificate
 		authority anchor, capable of anchoring a certificate chain, and not just
 		itself.</para>
 
 	<para>We define a new boolean attribute CKA_X_DISTRUSTED. If this is present and
-		set to CK_TRUE on an object with the class CKO_CERTICATE it marks that
-		certificate as being on the black list.</para>
+		set to CK_TRUE on an object with the class CKO_CERTIFICATE, it marks that
+		certificate as being on the blacklist.</para>
 
 	<para>A new object class is defined of type CKO_X_CERTIFICATE_EXTENSION. Each 
 		object of this class represents one stapled certificate extension. It
@@ -685,7 +685,7 @@ StoredParameters ::= SEQUENCE {
 	</varlistentry>
 	<varlistentry>
 		<term>CKA_OBJECT_ID</term>
-		<listitem><para>The DER encoded OID of the stapled certificate
+		<listitem><para>The DER-encoded OID of the stapled certificate
 			extension. Must be set.</para></listitem>
 	</varlistentry>
 	<varlistentry>
@@ -711,7 +711,7 @@ StoredParameters ::= SEQUENCE {
 		extensions before looking at the extensions present in the certificate
 		itself.</para>
 
-	<para>Every certificate in the chain should be checked against the black list
+	<para>Every certificate in the chain should be checked against the blacklist
 		in the store.</para>
 
 	<para>A certificate is treated as an anchor if it is present in the anchor
@@ -735,8 +735,8 @@ StoredParameters ::= SEQUENCE {
 <sect1 id="retrofitting">
 	<title>Retrofitting Stapled Certificate Extensions</title>
 
-	<para>In the real world not all crypto libraries will be using stapled
-		certificate extensions (yet). And thusly it is possible to retrofit
+	<para>In the real world not all crypto libraries will use stapled
+		certificate extensions (yet). Thus it is desirable to retrofit
 		use of stapled certificate extensions and the related stores on top
 		of a crypto library. There are several approaches that can be used.</para>
 
@@ -752,7 +752,7 @@ StoredParameters ::= SEQUENCE {
 
 	<para>If a crypto library allows access to the certificate chain before or after
 		validation, then it is possible to check each certificate in the chain against
-		the black list.</para>
+		the blacklist.</para>
 
 	<para>It is possible to model NSS PKCS#11 trust objects on top of an underlying storage
 		based on stapled certificate extensions. This will only enforce the KeyUsage
@@ -773,15 +773,15 @@ StoredParameters ::= SEQUENCE {
 
 	<itemizedlist>
 	<listitem>
-		<para>There are two ways to represent a black listed certificate. One way
-			is by explicitly putting it in the black list in the store. Another is by
+		<para>There are two ways to represent a blacklisted certificate. One way
+			is by explicitly putting it in the blacklist in the store. Another is by
 			removing all usages through a stapled certificate extension, or otherwise
 			constraining the certificate so that it is not possible to use it in any
 			scenario.</para>
 
 		<para>While this is not necessarily a bad thing. It is cause for thought.</para>
 
-		<para>Is it sufficient to remove the concept of an explicit black list, and rely
+		<para>Is it sufficient to remove the concept of an explicit blacklist, and rely
 			on a constraining stapled certificate extension, such as ExtendedKeyUsage
 			with no usages? This feels wrong, and like a hack, even though it works.</para>
 	</listitem>
@@ -795,7 +795,7 @@ StoredParameters ::= SEQUENCE {
 		to implement this document in p11-kit as a PKCS#11 trust store, and support
 		the storage formats above.</para>
 
-	<para>In addition, contribute towards retrofitting various crypto libraries to use the
+	<para>In addition, the author would like to contribute towards retrofitting various crypto libraries to use the
 		trust policy described here.</para>
 </sect1>
 
