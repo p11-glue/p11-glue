@@ -47,25 +47,33 @@
 	<para>In this document we examine a general purpose method for storing anchor
 		certificates, and representing policy about them. We also look at blacklists
 		and their peculiarities. We see how we can represent these in a
-		coherent and future-proof manner. In addition to be an extensible concept,
-		is relatively easy to implement and retrofit into existing code.</para>
-
-	<para>We are dealing here with the anchor of other trust information used by a
-		validation algorithm that lives inside of a crypto library. This can be
-		viewed as part of the input to the certificate validation algorithms.
-		We are not dealing with the validation algorithms themselves. These are
-		dealt in sufficient detail in the relevant RFCs 
-			<footnote><para>Certificate verification is dealt with in detail
-			in <ulink url="http://www.ietf.org/rfc/rfc5280.txt">RFC 5280</ulink>.
-			</para></footnote>.
-		While in theory it could be nice to have all crypto libraries share common
-		code for verification of certificates, imagining such an effort is outside 
-		the scope of this document. This document does not conflict with such a 
-		theoretical effort.</para>
+		coherent and future-proof manner. In addition to being an extensible concept,
+		it is relatively easy to implement and retrofit into existing code.</para>
 
 	<para>By using consistent anchors and other trust information, crypto libraries
 		can make consistent decisions about X.509 certificates.</para>
 
+	<sect2>
+		<title>Scope</title>
+
+		<para>We are dealing here with the anchor information and other trust policy
+			information used by a validation algorithm. The algorithm itself lives
+			inside of a crypto library implementation. This trust policy information
+			can be viewed as input to the certificate validation algorithms.
+			We are not dealing with the validation algorithms themselves. These are
+			dealt in sufficient detail in the relevant RFCs 
+			<footnote><para>Certificate verification is dealt with in detail
+			in <ulink url="http://www.ietf.org/rfc/rfc5280.txt">RFC 5280</ulink>.
+			</para></footnote>.
+			While in theory it could be nice to have all implementations share common
+			code for verification of certificates, imagining such an effort is outside
+			the scope of this document. This document does not conflict with such a
+			theoretical effort.</para>
+
+		<para>This document attempts to represent trust policy information for X.509
+			certificate validation. It does not attempt to tackle the theoretical
+			problem of representing all possible forms of digital trust.</para>
+	</sect2>
 </sect1>
 
 <sect1 id="background">
