@@ -27,11 +27,11 @@
 	<para>This document is in a state of construction. I applaud those who wish to join
 		in and participate. Many things like footnotes, clarifications are missing.
 		There is some editorializing that should not be in the final.
-		Comments including nit picking are welcome.</para>
+		Comments, including nit picking, are welcome.</para>
 
 	<para>The 
-		<ulink url="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org mailing list</ulink>
-		is the preferred venue for discussion.</para>
+		<ulink url="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</ulink>
+		mailing list is the preferred venue for discussion.</para>
 </sect1>
 
 <sect1 id="introduction">
@@ -73,7 +73,7 @@
 	<para>Since the words used with these topics are often heavily overloaded and
 		some concepts are discussed here.</para>
 
-	<para>A word on terminology. We use the word <emphasis>trust</emphasis> quite a bit
+	<para>A word on terminology. The word <emphasis>trust</emphasis> is used quite a bit
 		in this document. This is a highly overloaded and subjective term, and its use
 		in this specification is unfortunate. An unambiguous term is desirable.
 		The author cringes every time the word <emphasis>trust</emphasis> is used.
@@ -160,7 +160,7 @@
 		certificate are verified.</para>
 
 	<para>It is also possible to anchor and pin a certificate so that it anchors
-		itself and verifies irrespective of it's signature (eg: self-signed).
+		itself and verifies irrespective of its signature (eg: self-signed).
 		This is not equivalent to anchoring it as a certificate authority, where
 		it could anchor an entire certificate chain.</para>
 </sect2>
@@ -483,7 +483,7 @@ CertAux ::= SEQUENCE {
 		This is part of the whole.</para>
 
 	<para>There may not be more than one stapled certificate extension of a given
-		identifier or type. There is no way to auto matically merge certificate
+		identifier or type. There is no way to automatically merge certificate
 		extensions. It may be possible for applications (such as a management)
 		interface storing stapled certificate extensions to merge certain
 		extensions in some way. However that is out of the scope of this
@@ -536,23 +536,26 @@ CertAux ::= SEQUENCE {
 			field set to TRUE. This extension can be present either in
 			the certificate or stapled to it.</para>
 
-		<para>To change whether a certificate is an anchor or not, a
+		<para>To change whether a certificate is an authority or not, a
 			stapled BasicConstraints extension is added with the relevant
 			isCa and pathlen fields.</para>
+
+		<para>To change whether a certificate is an anchor or not, it is
+			added or removed from the list of anchors.</para>
 	</sect2>
 
 	<sect2 id="how-constraining-usages">
-		<title>Constraining Usages</title>
-	
+		<title>Constraining Usages/Purposes</title>
+
 		<para>An ExtendedKeyUsage or KeyUsage stapled certificate extension may
 			be added to a certificate when the system builder or administrator
-			wishes to define or override which usages a certificate can be
-			used for.</para>
+			wishes to define or override which purposes a certificate can be
+			used for (eg: server authentication, email, etc.)</para>
 
 		<para>In combination with the above section, these stapled certificate extensions
-			may be used to constrain for what usages anchors can be used.</para>
+			may be used to constrain for what purposes anchors can be used.</para>
 	</sect2>
-	
+
 	<sect2 id="how-constraining-names">
 		<title>Constraining Names</title>
 
@@ -560,20 +563,21 @@ CertAux ::= SEQUENCE {
 			certificate when the system builder or administrator wishes to define
 			which end entity names can be signed by a given certificate.</para>
 	</sect2>
-	
+
 	<sect2 id="how-blacklists">
 		<title>Representing Blacklists</title>
-	
+
 		<para>Presence of a certificate in the black list is what makes a certificate
-			unusable. Such a list is an abstract implementation specific concept,
+			distrusted. Such a list is an abstract implementation specific concept,
 			although we define some standard implementations below.</para>
 
 		<para>Additionally it is possible to blacklist a certificate by constraining
-			its usages with an ExtendedKeyUsage extension that contains no usages.
+			its trust policy with certificate extensions like ExtendedKeyUsage
+			so that it will not validate for any purpose or use case.
 			This is not the recommended approach. Implementors should instead place
 			the certificates on an explicit blacklist.</para>
 	</sect2>
-	
+
 	<sect2 id="how-pinned-certificates">
 		<title>Representing Pinned Certificates</title>
 
@@ -668,7 +672,7 @@ StoredParameters ::= SEQUENCE {
 		<listitem><para>The arbitrary byte string identifier of a
 			CKO_X_CERTIFICATE_EXTENSION must match the CKA_ID of the
 			CKO_CERTIFICATE which it is stapled to. This reflects the
-			customary PKCS#11 method of associated certificates and
+			customary PKCS#11 method of associating certificates and
 			keys. Must be set.</para></listitem>
 	</varlistentry>
 	<varlistentry>
@@ -695,8 +699,9 @@ StoredParameters ::= SEQUENCE {
 
 	<para>Validation algorithms should retrieve the stapled certificate extensions
 		for every certificate they wish to include in a certificate chain.
-		Extensions should be retrieved from the list of stapled certificate
-		extensions before looking at the certificate itself.</para>
+		Extensions should be consumed from the retrieved stapled certificate
+		extensions before looking at the extensions present in the certificate
+		itself.</para>
 
 	<para>Every certificate in the chain should be checked against the black list
 		in the store.</para>
@@ -714,6 +719,9 @@ StoredParameters ::= SEQUENCE {
 	<para>Extensions are used for validation in the exactly the same way regardless
 		of whether they are stapled or present in the certificate itself. This
 		includes the critical field of extensions.</para>
+
+	<para>Stapled certificate extensions override an extension with the same
+		object identifier present in the certificate itself.</para>
 </sect1>
 
 <sect1 id="retrofitting">
@@ -726,12 +734,13 @@ StoredParameters ::= SEQUENCE {
 
 	<para>In these scenarios not all trust policy will be enforced. Such a retrofit
 		should be an interim measure. However even such an interim retrofit produces
-		coherent results for most current use cases. It is thus better than having
+		coherent results for most current real world use cases. It is thus better than having
 		all the crypto libraries use their own source for trust policy.</para>
 
 	<para>If a crypto library expects an input of a set of anchor certificate authorities
 		and nothing more, then it is possible to retrieve the set of acceptable
-		certificate authorities from the store.</para>
+		certificate authority anchors from the store. Anchors that no not match
+		the necessary trust policy would be filtered out beforehand.</para>
 
 	<para>If a crypto library allows access to the certificate chain before or after
 		validation, then it is possible to check each certificate in the chain against
