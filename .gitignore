@@ -1,3 +1,5 @@
 junk
 html
 specs/*.html
+.project
+.cproject
