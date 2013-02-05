@@ -16,9 +16,10 @@ authority anchors, black lists, and other locally stored system trust policy.</p
 this <a href="sharing-trust-policy.html">shared trust policy</a>. Once such a
 solution matures we hope to implement it in this PKCS#11 trust storage module.</p>
 
-<p>Also included will be a tool that can be used to extract certificates in
-various formats for crypto libraries not (or not yet) able to read from this
-PKCS#11 trust module directly.</p>
+<p>Also included is a tool called <tt>p11-kit extract-trust</tt> that can be used
+to extract certificates anchors with trust information in various formats for
+crypto libraries not (or not yet) able to read from this PKCS#11 trust module
+directly.</p>
 
 <p>A goal is to have minimal dependencies, and be crypto library agnostic so this
 can be used by any library or app. Accesses information owned by root and configured
@@ -29,19 +30,21 @@ moving parts.</p>
 
 <h2>Source Repository</h2>
 
-<p>So far <a href="http://cgit.freedesktop.org/p11-glue/p11-kit/log/?h=trust">the code</a>
-lives in the <tt>trust</tt> branch of the <tt>p11-kit</tt> repository:</p>
+<p>Code has been merged into the main p11-kit repository, and is found in
+the <tt>trust/</tt> subdirectory. The extract code is found in the <tt>tools</tt>
+subdirectory:</p>
 
 <pre>
 $ git clone git://anongit.freedesktop.org/p11-glue/p11-kit
 $ cd p11-kit
-$ git checkout trust
+$ cd trust/
 </pre>
 
 <h2>Status</h2>
 
-<p>An initial implementation of the module is available, and you can try it out. A dependency
-on libtasn1-devel is required to build the PKCS#11 trust module.</p>
+<p>An implementation of the module is available, and you can try it out. A dependency
+on libtasn1-devel is required to build the PKCS#11 trust module. The extract
+tool is also implemented.</p>
 
 <pre>
 $ sh autogen.sh --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib64 --enable-debug \
@@ -71,11 +74,18 @@ this to see some debug output:</p>
 $ P11_KIT_DEBUG=all firefox
 </pre>
 
-<p>The extraction tool is not yet ready.</p>
+<p>Run the extraction tool, and/or customize it:</p>
+
+<pre>
+$ p11-kit extract-trust
+</pre>
 
 <h2>Documentation</h2>
 
-<p>Still in proposal/conceptual stages.</p>
+<ul>
+	<li><a href="http://p11-glue.freedesktop.org/doc/p11-kit/trust.html">Trust policy module documentation</a></li>
+	<li><a href="http://p11-glue.freedesktop.org/doc/p11-kit/p11-kit.html">Extract tool documentation</a></li>
+</ul>
 
 <h2>Contributing</h2>
 
