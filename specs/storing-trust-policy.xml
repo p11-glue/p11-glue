@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+]>
+<book>
+	<title>Storing Trust Policy</title>
+
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+		href="storing-trust-basics.xml"/>
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+		href="storing-trust-existing.xml"/>
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+		href="storing-trust-pkcs11.xml"/>
+
+</book>

@@ -1,7 +1,22 @@
-all: html/index.html
+NULL =
 
-html/index.html: docbook-params.xsl sharing-trust-anchors.xml Makefile
-	xmlto -vv -m docbook-params.xsl html-nochunks sharing-trust-anchors.xml
+STORING_TRUST_FILES = \
+	storing-trust-basics.xml \
+	storing-trust-existing.xml \
+	storing-trust-pkcs11.xml \
+	storing-trust-policy.xml \
+	$(NULL)
+
+STORING_TRUST_DIR = storing-trust
+
+all: $(STORING_TRUST_DIR)/index.html
+
+clean:
+	rm -rf $(STORING_TRUST_DIR)
+
+$(STORING_TRUST_DIR)/index.html: docbook-params.xsl Makefile $(STORING_TRUST_FILES)
+	mkdir -vp $(STORING_TRUST_DIR)/
+	rm -vf $(STORING_TRUST_DIR)/*
+	xmlto -vv -m docbook-params.xsl -o $(STORING_TRUST_DIR) html storing-trust-policy.xml
 
 -include Makefile.local
-

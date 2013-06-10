@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+]>
+<article id="storing-trust-pkcs11">
+<title>PKCS#11 Extensions for Storing Trust Information</title>
+
+<articleinfo>
+	<releaseinfo>Take two draft</releaseinfo>
+	<date>June 2013</date>
+	<authorgroup>
+		<author>
+			<firstname>Stef</firstname>
+			<surname>Walter</surname>
+			<affiliation>
+				<orgname>Red Hat Inc.</orgname>
+				<address>
+					<email>stefw@redhat.com</email>
+				</address>
+			</affiliation>
+		</author>
+	</authorgroup>
+</articleinfo>
+
+<sect1 id="pkcs11">
+	<title>PKCS#11 Extensions for Stapled Certificate Extensions</title>
+
+	<para><ulink url="http://www.cryptsoft.com/pkcs11doc/">PKCS#11</ulink> is a useful
+		and widely supported standard for storage and use of keys and certificates.
+		It is often used with smart cards.</para>
+
+	<para>Here we outline how to use PKCS#11 as a store of stapled certificate extensions,
+		anchors	and blacklisted certificates. We do this in the stardard PKCS#11
+		object model, by defining a few extra attributes.</para>
+
+	<para>To make it clear which attributes are defined here and which are standard,
+		all new attributes and values are prefixed by the letters <literal>_X_</literal>. Once
+		standardized they would lose this tag.</para>
+
+	<para>The standard CKA_TRUSTED boolean attribute is used on an object with the 
+		class CKO_CERTIFICATE to mark it as an anchor. The presence of a
+		BasicConstraints certificate extension marks it as a certificate
+		authority anchor, capable of anchoring a certificate chain, and not just
+		itself.</para>
+
+	<para>We define a new boolean attribute CKA_X_DISTRUSTED. If this is present and
+		set to CK_TRUE on an object with the class CKO_CERTIFICATE, it marks that
+		certificate as being on the blacklist.</para>
+
+	<para>A new object class is defined of type CKO_X_CERTIFICATE_EXTENSION. Each 
+		object of this class represents one stapled certificate extension. It
+		contains the following (standard and newly defined) attributes (in addition
+		to the standard data storage attributes):</para>
+
+	<variablelist>
+	<varlistentry>
+		<term>CKA_ID</term>
+		<listitem><para>The arbitrary byte string identifier of a
+			CKO_X_CERTIFICATE_EXTENSION must match the CKA_ID of the
+			CKO_CERTIFICATE which it is stapled to. This reflects the
+			customary PKCS#11 method of associating certificates and
+			keys. Must be set.</para></listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>CKA_OBJECT_ID</term>
+		<listitem><para>The DER-encoded OID of the stapled certificate
+			extension. Must be set.</para></listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>CKA_X_CRITICAL</term>
+		<listitem><para>A CK_BBOOL value indicating whether the extension
+			is critical or not. Defaults to CK_FALSE if not set.</para></listitem>
+	</varlistentry>
+	<varlistentry>
+		<term>CKA_VALUE</term>
+		<listitem><para>The DER encoded value of the certificate extension.
+			Must be set.</para></listitem>
+	</varlistentry>
+	</variablelist>
+
+</sect1>
+
+</article>

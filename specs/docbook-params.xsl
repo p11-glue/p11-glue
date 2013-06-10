@@ -21,17 +21,19 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 -->
 
-<!--	<xsl:param name="generate.toc">
+	<xsl:param name="generate.toc">
 		book     toc
 		part     nop
 		chapter  toc
-		sect1    toc
-		sect2    toc
-		sect3    toc
-	</xsl:param>-->
+		article  toc
+	</xsl:param>
+
 	<xsl:param name="html.stylesheet">style.css</xsl:param>
 	<xsl:param name="refentry.generate.name">0</xsl:param>
 	<xsl:param name="refentry.generate.title">1</xsl:param>
 	<xsl:param name="section.autolabel">1</xsl:param>
-
+	<xsl:param name="chunk.section.depth" select="0"></xsl:param>
+	<xsl:param name="tox.max.depth" select="0"></xsl:param>
+	<xsl:param name="toc.section.depth" select="1"></xsl:param>
+	<xsl:param name="use.id.as.filename" select="1"></xsl:param>
 </xsl:stylesheet>
