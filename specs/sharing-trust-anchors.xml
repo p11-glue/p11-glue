@@ -2,11 +2,11 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 ]>
 <article>
-<title>Sharing Trust Policy aka. Stapled Certificate Extensions</title>
+<title>Sharing Trust Anchors and Blacklists aka. Stapled Certificate Extensions</title>
 
 <articleinfo>
-	<releaseinfo>Rough "rougher than a bag of spanners" draft</releaseinfo>
-	<date>December 2012</date>
+	<releaseinfo>Take two draft</releaseinfo>
+	<date>June 2013</date>
 	<authorgroup>
 		<author>
 			<firstname>Stef</firstname>
@@ -70,9 +70,17 @@
 			the scope of this document. This document does not conflict with such a
 			theoretical effort.</para>
 
-		<para>This document attempts to represent trust policy information for X.509
+		<para>This document attempts to represent basic trust policy information for X.509
 			certificate validation. It does not attempt to tackle the theoretical
-			problem of representing all possible forms of digital trust.</para>
+			problem of representing all possible forms of digital trust. There are
+			many possible inputs to certificate validation which are not represented.
+			Instead this is a common base of information to share, which can be extended
+			by applications and/or libraries.</para>
+
+		<para>This document limits itself to treatment of anchors and blacklisted
+			certificates. Later companion documents will deal with pinned
+			keys and shared state/storage needed by alternative trust
+			implementations.</para>
 	</sect2>
 </sect1>
 
@@ -153,24 +161,6 @@
 	<para>On Linux there has been no standard way to represent blacklists. Various
 		crypto libraries have various means of representing them, and we examine
 		them below. This document wishes to define a such a standard.</para>
-</sect2>
-
-<sect2 id="pinned-certificates">
-	<title>About Pinned Certificates</title>
-
-	<para>Pinned certificates are a concept discussed in RFC 6125. During configuration
-		or after a failure to match the peer's certificate name, a local user may
-		choose to pin a certificate to a given peer. This allows use of the
-		certificate even though the CN or SubjectAltName of the certificate does
-		not match the peer.</para>
-
-	<para>Note that in a pinned certificate the signature and other aspects of the
-		certificate are verified.</para>
-
-	<para>It is also possible to anchor and pin a certificate so that it anchors
-		itself and verifies irrespective of its signature (eg: self-signed).
-		This is not equivalent to anchoring it as a certificate authority, where
-		it could anchor an entire certificate chain.</para>
 </sect2>
 
 </sect1>
@@ -315,8 +305,6 @@
 				for specific usages. This works in practice but does not correctly
 				model the reality of having a certificate blacklisted completely
 				and for any usage.</para></listitem>
-			<listitem><para>There is no way to represent a certificate pinned to a
-				specific peer.</para></listitem>
 			<listitem><para>Trust objects are a PKCS#11 specific. While PKCS#11 is one
 				acceptable object model for representing out-of-band trust policy,
 				for a standard representation it cannot be the only one.</para></listitem>
@@ -376,8 +364,6 @@ CertAux ::= SEQUENCE {
 				specific usages. This works in practice but does not correctly
 				model the reality of having a certificate blacklisted completely
 				and for any usage.</para></listitem>
-			<listitem><para>There is no way to represent a certificate pinned to a
-				specific peer.</para></listitem>
 			<listitem><para>This format has OpenSSL implementation specific traits.
 				The PEM contents are the concatenation of two DER structures,
 				and though trivially parseable with the OpenSSL DER parser, it
@@ -450,10 +436,6 @@ CertAux ::= SEQUENCE {
 				that certificate is used in the middle of a certificate chain
 				rather than as an anchor, the certificate validation will
 				not respect such a removal.</para></listitem>
-			<listitem><para>There is no way to represent a certificate pinned to
-				a specific peer. Adding such a pinned certificate to the bundle
-				has the effect of trusting it for any peer, and as a certificate
-				authority.</para></listitem>
 			</itemizedlist>
 		</sect3>
 	</sect2>
@@ -585,63 +567,6 @@ CertAux ::= SEQUENCE {
 			This is not the recommended approach. Implementors should instead place
 			the certificates on an explicit blacklist.</para>
 	</sect2>
-
-	<sect2 id="how-pinned-certificates">
-		<title>Representing Pinned Certificates</title>
-
-		<para>A certificate is pinned to a specific peer by adding a SubjectAltName
-			stapled certificate extension to that certificate in the local store.</para>
-
-		<para>If it is wished to make a pinned certificate also be an anchor (although
-			not necessarily a certificate authority anchor) then it can be placed
-			in the local anchor store.</para>
-	</sect2>
-</sect1>
-
-<sect1 id="asn1">
-	<title>ASN.1 Data Format for Stored Certificates</title>
-
-	<para>This is a ASN.1 representation of a certificate stored with stapled certificate
-		extensions, as well as anchor and blacklist flags. It also includes a
-		friendlyName alias field as many of the other previous solutions do.</para>
-
-	<para>A set of these structures may form a rudimentary certificate store, although
-		it is envisioned to be more commonly used as a storage and transfer
-		format.</para>
-
-	<para>Were this structure wrapped in OpenSSL style PEM encoding, it would likely
-		get a 'STORED CERTIFICATE' header.</para>
-
-	<para>Here is the ASN.1 definition:
-<programlisting>
--- TODO: Better names?
-StoredCertificate ::=  SEQUENCE {
-	reason               StoredReason,
-	certificate          Certificate,
-	friendlyName         OPTIONAL UTF8String,
-	stapledExtensions    SEQUENCE OF Extension,
-	parameters           SEQUENCE OF StoredParameters OPTIONAL
-}
-
-StoredReason ::= ENUMERATED {
-	unspecified          (0),
-	anchor               (1),
-	blacklist            (2)
-}
-
-StoredParameters ::= SEQUENCE {
-	type                 OBJECT IDENTIFIER,
-	parameters           ANY DEFINED BY type OPTIONAL
-}
-</programlisting>
-	</para>
-
-	<para>The parameters field contains additional implementation defined data to be
-		stored along with the certificate. This must not affect trust policy, which
-		should be defined using the stapledExtensions field.</para>
-
-	<para>The reason field is used to mark a certificate as an anchor or put it on
-		the blacklist.</para>
 </sect1>
 
 <sect1 id="pkcs11">
@@ -808,4 +733,3 @@ StoredParameters ::= SEQUENCE {
 </sect1>
 
 </article>
-
