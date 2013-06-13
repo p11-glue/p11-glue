@@ -8,11 +8,14 @@
 		there is likely a need to have a standard JSON form for the the models
 		described in these documents.</para>
 
-	<para><emphasis>Work item: </emphasis> We need to look at the interested JSON
+	<note>
+		<title>Work Item</title>
+		<para>We need to look at the interested JSON
 		callers and discuss the desired form.  It is undesirable to design an
 		API in a vacuum. Therefore if you are such an interested caller,
 		please contact
 		<ulink url="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</ulink>
 		for discussion.</para>
+	</note>
 
 </article>

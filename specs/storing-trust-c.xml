@@ -8,12 +8,15 @@
 		is callable from C, there is likely a need for a simpler C API and ABI to
 		access the trust information.</para>
 
-	<para><emphasis>Work item: </emphasis> At the present time no C caller for
+	<note>
+		<title>Work item</title>
+		<para>At the present time no C caller for
 		such an API exists. Most crypto libraries already use PKCS#11 to access
 		keys and certificates, and thus they are not the consumer for this C API.
 		It is also undesirable to design an API in a vacuum. Therefore if you are
 		such an interested caller, please contact
 		<ulink url="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</ulink>
 		for discussion.</para>
+	</note>
 
 </article>

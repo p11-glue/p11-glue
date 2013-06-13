@@ -2,7 +2,7 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 ]>
 <article id="storing-trust-pkcs11">
-<title>Representation: PKCS#11</title>
+	<title>Representation: PKCS#11</title>
 
 	<para><ulink url="http://www.cryptsoft.com/pkcs11doc/">PKCS#11</ulink> is a useful
 		and widely supported standard for storage and use of keys and certificates.
@@ -11,8 +11,8 @@
 	<para>Here we outline how to use PKCS#11 as a store for trust policy, containing sets
 		for anchors, blacklist, and stapled extensions.</para>
 
-<sect1 id="pkcs11-store">
-	<title>Stores</title>
+<simplesect id="pkcs11-store">
+	<title>Store representation</title>
 
 	<para>We define a trust store using the stardard PKCS#11 object model, with a few
 		new attributes.</para>
@@ -116,9 +116,9 @@
 		</varlistentry>
 	</variablelist>
 
-</sect1>
+</simplesect>
 
-<sect1 id="pkcs11-anchors">
+<simplesect id="pkcs11-anchors">
 	<title>Set: Anchors</title>
 
 	<para>The standard <literal>CKA_TRUSTED</literal> boolean attribute is used
@@ -168,9 +168,9 @@
 	<para>Note that the presence of a BasicConstraints extension marks it as a
 		certificate authority anchor, capable of anchoring a certificate chain,
 		and not just itself.</para>
-</sect1>
+</simplesect>
 
-<sect1 id="pkcs11-blacklist">
+<simplesect id="pkcs11-blacklist">
 	<title>Set: Blacklist</title>
 
 	<para>We define a new boolean attribute CKA_X_DISTRUSTED to indicate
@@ -217,9 +217,9 @@
 
 	<para>Other standard PKCS#11 fields should be present on the objects as per
 		the <literal>CKA_CLASS</literal> attribute.</para>
-</sect1>
+</simplesect>
 
-<sect1>
+<simplesect>
 	<title>Set: Stapled Extensions</title>
 
 	<para>A new object class is defined of type <literal>CKO_X_CERTIFICATE_EXTENSION</literal>. Each 
@@ -245,7 +245,7 @@
 			X.509.</para></listitem>
 		</varlistentry>
 		<varlistentry>
-			<term>CKA_VALUE</term>
+			<term><literal>CKA_VALUE</literal></term>
 			<listitem><para>The DER encoded value of the Extension sequence as
 				defined in X.509</para></listitem>
 		</varlistentry>
@@ -254,15 +254,19 @@
 	<para>In addition the PKCS#11 <emphasis>Common Storage Object Attributes</emphasis> may
 	be present, as well as the <literal>CKA_ID</literal> attribute.</para>
 
-</sect1>
+</simplesect>
 
-<sect1 id="pkcs11-constants">
+<simplesect id="pkcs11-constants">
 	<title>Constants</title>
 
-	<para><emphasis>Work item:</emphasis> Define vendor extension constants for the above
+	<note>
+		<title>Work Item</title>
+		<para>Define vendor extension constants for the above
 		new attributes. One of the attributes CKA_PUBLIC_KEY_INFO may be standardized
 		by the PKCS#11 TC within the next short while, thus not rushing to do this. Will
 		timeout if not done shortly.</para>
-</sect1>
+	</note>
+
+</simplesect>
 
 </article>

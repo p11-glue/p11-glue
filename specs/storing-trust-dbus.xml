@@ -9,11 +9,14 @@
 		privilege escalation (polkit prompting) to modify the system
 		wide trust stores.</para>
 
-	<para><emphasis>Work item: </emphasis> We need to look at the interested DBus
+	<note>
+		<title>Work item</title>
+		<para>We need to look at the interested DBus
 		callers and discuss the desired form.  It is undesirable to design an
 		API in a vacuum. Therefore if you are such an interested caller,
 		please contact
 		<ulink url="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</ulink>
 		for discussion.</para>
+	</note>
 
 </article>

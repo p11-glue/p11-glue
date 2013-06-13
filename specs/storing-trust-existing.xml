@@ -2,27 +2,7 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 ]>
 <article id="storing-trust-existing">
-<title>Existing Trust Storage Implementations</title>
-
-<articleinfo>
-	<releaseinfo>Take two draft</releaseinfo>
-	<date>June 2013</date>
-	<authorgroup>
-		<author>
-			<firstname>Stef</firstname>
-			<surname>Walter</surname>
-			<affiliation>
-				<orgname>Red Hat Inc.</orgname>
-				<address>
-					<email>stefw@redhat.com</email>
-				</address>
-			</affiliation>
-		</author>
-	</authorgroup>
-</articleinfo>
-
-<sect1 id="existing">
-	<title>Existing Representations of Trust Policy</title>
+	<title>Existing Trust Storage Implementations</title>
 
 	<para>Obviously if a comprehensive, future-proof and realistic standard
 		representation of out-of-band trust policy exists, we should not define a
@@ -30,7 +10,7 @@
 		examine	the various representations in use, and why they are insufficient
 		to provide such a comprehensive standard.</para>
 
-	<sect2 id="nss-trust-objects">
+	<sect1 id="nss-trust-objects">
 		<title>NSS Trust Objects</title>
 
 		<para>Internally NSS represents out-of-band trust policy using PKCS#11
@@ -148,7 +128,7 @@
 		</varlistentry>
 		</variablelist>
 
-		<sect3 id="nss-trust-problems">
+		<sect2 id="nss-trust-problems">
 			<title>Deficiencies</title>
 			<para>NSS trust objects have been around for nearly two decades. They may
 				have been sufficient in the past but are showing their age.</para>
@@ -175,10 +155,10 @@
 				acceptable object model for representing out-of-band trust policy,
 				for a standard representation it cannot be the only one.</para></listitem>
 			</itemizedlist>
-		</sect3>
-	</sect2>
+		</sect2>
+	</sect1>
 
-	<sect2 id="openssl-trusted">
+	<sect1 id="openssl-trusted">
 		<title>OpenSSL Trusted Certificates</title>
 		<para>OpenSSL contains a representation of out-of-band trust policy in its 
 			<literal>TRUSTED CERTIFICATE</literal> PEM blocks aka. CertAux.
@@ -215,7 +195,7 @@ CertAux ::= SEQUENCE {
 			ExtendedKeyUsage certificate extension. The other fields are
 			not related to trust policy.</para>
 
-		<sect3 id="openssl-trusted-problems">
+		<sect2 id="openssl-trusted-problems">
 			<title>Deficiencies</title>
 
 			<para>This representation seems to be designed to solve a specific use
@@ -236,18 +216,18 @@ CertAux ::= SEQUENCE {
 				is awkward to parse especially when using other and/or strict
 				DER parsers.</para></listitem>
 			</itemizedlist>
-		</sect3>
-	</sect2>
+		</sect2>
+	</sect1>
 
 
-	<sect2 id="trust-assertions">
+	<sect1 id="trust-assertions">
 		<title>Trust Assertions</title>
 
 		<para>Trust Assertions are the author's previous attempt to solve the problem of sharing
 			trust policy information. Details about this are available online
 				<footnote><para><ulink url="http://p11-glue.freedesktop.org/doc/pkcs11-trust-assertions/">Storing Trust Assertions in PKCS#11 Modules</ulink></para></footnote>.</para>
 
-		<sect3 id="trust-assertion-problems">
+		<sect2 id="trust-assertion-problems">
 			<title>Deficiencies</title>
 
 			<para>Although claiming to solve the problem of out-of-band trust policy
@@ -270,10 +250,10 @@ CertAux ::= SEQUENCE {
 			<para>In addition claims of extensibility and generality proved hard
 				to implement in the real world, and trust assertions ended up
 				as a far more constrained concept that initially envisioned.</para>
-		</sect3>
-	</sect2>
+		</sect2>
+	</sect1>
 
-	<sect2 id="ca-bundles">
+	<sect1 id="ca-bundles">
 		<title>Certificate Authority Bundles</title>
 
 		<para>A bundle is either a file or directory containing one or more X.509
@@ -283,7 +263,7 @@ CertAux ::= SEQUENCE {
 		<para>They are usually stored in the OpenSSL PEM format, but may also be
 			seen in the Java Keystore format, and others.</para>
 
-		<sect3 id="ca-bundle-problems">
+		<sect2 id="ca-bundle-problems">
 			<title>Deficiencies</title>
 
 			<para>Although widely used today certificate authority bundles have
@@ -303,8 +283,7 @@ CertAux ::= SEQUENCE {
 				rather than as an anchor, the certificate validation will
 				not respect such a removal.</para></listitem>
 			</itemizedlist>
-		</sect3>
-	</sect2>
-</sect1>
+		</sect2>
+	</sect1>
 
 </article>

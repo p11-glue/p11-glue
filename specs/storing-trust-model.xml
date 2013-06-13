@@ -4,23 +4,6 @@
 <article id="storing-trust-model">
 <title>Model: Anchors and Blacklists</title>
 
-<articleinfo>
-	<releaseinfo>Take two draft</releaseinfo>
-	<date>June 2013</date>
-	<authorgroup>
-		<author>
-			<firstname>Stef</firstname>
-			<surname>Walter</surname>
-			<affiliation>
-				<orgname>Red Hat Inc.</orgname>
-				<address>
-					<email>stefw@redhat.com</email>
-				</address>
-			</affiliation>
-		</author>
-	</authorgroup>
-</articleinfo>
-
 <sect1 id="introduction">
 	<title>Introduction</title>
 
