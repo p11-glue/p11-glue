@@ -4,11 +4,43 @@
 <book>
 	<title>Storing Trust Policy</title>
 
+	<bookinfo>
+		<releaseinfo>Take two draft</releaseinfo>
+		<date>June 2013</date>
+		<authorgroup>
+			<author>
+				<firstname>Stef</firstname>
+				<surname>Walter</surname>
+				<affiliation>
+					<orgname>Red Hat Inc.</orgname>
+					<address>
+						<email>stefw@redhat.com</email>
+					</address>
+				</affiliation>
+			</author>
+		</authorgroup>
+	</bookinfo>
+
+	<preface id="status">
+		<title>Status of this document</title>
+	
+		<para>This document is in a state of construction. I applaud those who wish to join
+			in and participate. Many things like footnotes, clarifications are missing.
+			There is some editorializing that should not be in the final.
+			Comments, including nit picking, are welcome.</para>
+	
+		<para>The 
+			<ulink url="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</ulink>
+			mailing list is the preferred venue for discussion.</para>
+	</preface>
+
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-		href="storing-trust-basics.xml"/>
-	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-		href="storing-trust-existing.xml"/>
+		href="storing-trust-model.xml"/>
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
 		href="storing-trust-pkcs11.xml"/>
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+		href="storing-trust-retrofit.xml"/>
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+		href="storing-trust-existing.xml"/>
 
 </book>

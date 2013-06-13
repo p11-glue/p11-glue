@@ -1,0 +1,501 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+]>
+<article id="storing-trust-model">
+<title>Storing Anchors and Blacklists</title>
+
+<articleinfo>
+	<releaseinfo>Take two draft</releaseinfo>
+	<date>June 2013</date>
+	<authorgroup>
+		<author>
+			<firstname>Stef</firstname>
+			<surname>Walter</surname>
+			<affiliation>
+				<orgname>Red Hat Inc.</orgname>
+				<address>
+					<email>stefw@redhat.com</email>
+				</address>
+			</affiliation>
+		</author>
+	</authorgroup>
+</articleinfo>
+
+<sect1 id="introduction">
+	<title>Introduction</title>
+
+	<para>Various crypto libraries have various ways to represent and store information
+		about which Certificate Authorities are to be used as trust anchors. They also
+		have different ways to represent certificates that are blacklisted.</para>
+
+	<para>This has led to a poor experience and a lack of coherency on Linux when it
+		comes to validating certificates.</para>
+
+	<para>In this document we examine a general purpose method for storing anchor
+		certificates, and representing policy about them. We also look at blacklists
+		and their peculiarities. We see how we can represent these in a
+		coherent and future-proof manner. In addition to being extensible, the proposed concept
+		is relatively easy to implement and retrofit into existing code.</para>
+
+	<para>By using consistent anchors and other trust information, crypto libraries
+		can make consistent decisions about X.509 certificates.</para>
+
+	<sect2>
+		<title>Scope</title>
+
+		<para>We are dealing here with the anchors and other trust policy
+			information used by a key or certificate validation algorithm. The algorithm
+			itself lives inside of a crypto library implementation. This trust policy
+			information can be viewed as input to the certificate validation algorithms.
+			We are not dealing with the validation algorithms themselves. These are
+			dealt in sufficient detail in the relevant RFCs 
+			<footnote><para>Certificate verification is dealt with in detail
+			in <ulink url="http://www.ietf.org/rfc/rfc5280.txt">RFC 5280</ulink>.
+			</para></footnote>.
+			While in theory it could be nice to have all implementations share common
+			code for verification of certificates, imagining such an effort is outside
+			the scope of this document. This document does not conflict with such a
+			theoretical effort.</para>
+
+		<para>This document attempts to represent basic local trust policy information for X.509
+			certificate validation. It does not attempt to tackle the theoretical
+			problem of representing all possible forms of digital trust. There are
+			many possible flags, profiles and inputs to certificate validation which are
+			not represented. Instead this is a common base of information to share, which
+			augmented by other application specific information.</para>
+
+		<para>This document currently limits itself to treatment of anchors and blacklisted
+			certificates. Later companion documents will deal with pinned keys and shared
+			state/storage needed by alternative trust validation implementations.</para>
+	</sect2>
+</sect1>
+
+<sect1 id="concepts">
+	<title>Concepts</title>
+	<para>Since the words used with these topics are often heavily overloaded and
+		some concepts are discussed here.</para>
+
+	<para>A word on terminology. The word <emphasis>trust</emphasis> is used quite a bit
+		in this document. This is a highly overloaded and subjective term, and its use
+		in this specification is unfortunate. An unambiguous term is desirable.
+		The author cringes every time the word <emphasis>trust</emphasis> is used.
+		The author cringed a lot while writing this document.</para>
+
+<sect2 id="concept-anchors">
+	<title>About Anchors</title>
+
+	<para>X.509 is structured around the concept of having a chain of certificates, each
+		of which is signed and therefore trusted by the previous certificate in the
+		chain: a certificate authority. These chains are built by crypto libraries
+		when validating certificates. They are built in various ways, several of
+		which are outlined in RFC 5280.</para>
+
+	<para>At one end of a certificate chain is the <emphasis>end entity</emphasis>
+		certificate, which is the certificate that is being validated. At the other
+		end the certificate chain is anchored by a trust anchor. This is a public
+		key that is explicitly trusted by the local system, either by default or
+		by a deliberate configuration choice. Usually this public key is represented
+		as a certificate. The anchor is usually, but not always, a root self-signed
+		certificate authority.</para>
+
+	<para>Anchors can have <emphasis>trust policy</emphasis>
+		<footnote><para>Note we use the term <emphasis>policy</emphasis> here rather
+			broadly, and is not limited to the PolicyConstraints certificate
+			extension. Rather it includes such concepts as ExtendedKeyUsage,
+			NameConstraints, PolicyConstraints, and so on.</para></footnote>
+		attached to them which define the situations
+		they can be used as anchors. This policy takes on many forms. A given
+		anchor might be only be relevant when verifying an end entity certificate
+		used for email. Another anchor might be relevant only for an end entity
+		certificate that has a Common Name under a certain domain. There are many
+		such policies and combinations of them.</para>
+
+	<para>When the anchor public key is represented by a certificate, this trust policy
+		is often included in the certificate itself. This is done by use of X.509
+		certificate extensions. The email anchor above would have an ExtendedKeyUsage 
+			<footnote><para>See RFC 5280 section 4.2.1.12</para></footnote>
+		certificate extension included in it. The second anchor above would have a
+		NameConstraints
+			<footnote><para>See RFC 5280 section 4.2.1.10</para></footnote>
+		certificate extension included in it.</para>
+
+	<para>But it very often occurs that the trust policy included with the anchor
+		is not present or is not enough. System builders, administrators, and others wish to
+		override or adjust the trust policy for a given certificate authority
+		especially when used as an anchor. This overridden out-of-band trust policy
+		is not included in the anchor itself.</para>
+
+	<para>On Linux there has been no standard way to represent this additional trust
+		policy. Various crypto libraries have various of representing this out-of-band
+		trust policy, <link linkend="storing-trust-existing">as examined elsewhere</link>.
+		This document wishes to define such a standard.</para>
+</sect2>
+
+<sect2 id="concept-stapled">
+	<title>About Stapled Extensions</title>
+
+	<para>X.509 certificate extensions usually define the ways that a certificate
+		can be used to represent trust policy. Usually these
+		certificate extensions are internal to the certificate, and are signed
+		by the key holder of the certificate.</para>
+
+	<para>By associating additional certificate extensions to a public key or
+		X.509 certificate we can represent out-of-band trust policy, as defined
+		by a system builder, administrator or user.</para>
+
+	<para>We will refer to these additional extensions as <emphasis>Stapled
+		Extensions</emphasis>.</para>
+
+	<para>When both standard X.509 certificate extensions and stapled extensions are
+		present, the stapled extension is to be used instead of the certificate
+		extension with the same OID in the certificate itself. In this way stapled
+		certificate extensions override policy defined in the certificate, if any.</para>
+
+	<para>This has the implication that if only one portion of a certificate extension
+		needs to be adjusted by a stapled certificate extension, that entire
+		extension will be overridden for that certificate. This is intentional. Each extension
+		that contains trust policy should be treated as a whole unit of trust
+		policy. This includes changing the critical field of an extension.
+		This is part of the whole.</para>
+
+	<para>For each certificate, there may not be more than one stapled certificate extension of a given
+		identifier or type. There is no way to automatically merge certificate
+		extensions. It may be possible for applications which store stapled
+		certificate extensions (such as a management interface) to merge certain
+		extensions in some way. However that is out of the scope of this
+		document.</para>
+
+	<para>Stapled certificate extensions are associated with the subject public key info
+		of the anchor or certificate.</para>
+</sect2>
+
+<sect2 id="concept-blacklist">
+	<title>About Blacklisting and Revocation</title>
+
+	<para>A blacklisted key or certificate is one that should be rejected outright
+		when it is encountered in a validation algorithm.</para>
+
+	<para>As designed, when an X.509 certificate is compromised, either through malice
+		or accident, it is supposed to be revoked. Verification algorithms check against
+		lists of revoked certificates published by certificate authorities in
+		standard ways.</para>
+
+	<para>When an anchor certificate is revoked, or revocation needs to take place
+		independent of the certificate authority, such a certificate is added to
+		a blacklist. This is a separate mechanism from the certificate revocation
+		lists outlined in X.509.</para>
+
+	<para>Blacklists are distributed by system builders or administrators. They are
+		used as a supplement to retrieved revocation lists, and dynamic protocols
+		such as OCSP and OCSP Stapling.</para>
+
+	<para>On Linux there has been no standard way to represent blacklists. Various
+		crypto libraries have various means of representing them, and
+		<link linkend="storing-trust-existing">we examine them elsewhere</link>.
+		This document wishes to define a such a standard.</para>
+</sect2>
+
+</sect1>
+
+<sect1 id="model">
+	<title>Model</title>
+
+	<para>Over the years there have been many ways that anchors and
+		blacklists have been represented. It is clear that none of the
+		<link linkend="storing-trust-existing">examined representations</link>
+		serve to comprehensively model the necessary trust information.</para>
+
+	<para>Here we discuss a stored model which can be used to store,
+		lookup, and share (between implementations) anchors and blacklists.
+		The model is generic in nature and defines the characteristics
+		that actual APIs and formats should have.</para>
+
+	<para>Actual APIs for accessing this model are defined in companion
+		documents.</para>
+
+<sect2 id="model-store">
+	<title>The Store</title>
+
+	<para>In its general form the store has the following characteristics. It is
+		a subset of the behavior and characteritsics used by many other
+		object stores or relational models.</para>
+
+	<variablelist>
+		<varlistentry>
+			<term>Sets</term>
+			<listitem><para>The store contains various data <emphasis>sets</emphasis>
+				used for various various purposes.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Items</term>
+			<listitem><para>Each set contains multiple items.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Fields</term>
+			<listitem><para>Each item has fields. Fields have an identifier,
+				and contain byte data as their value.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Lookup fields</term>
+			<listitem><para>Certain fields are used to lookup items in a
+				set. These lookup fields are not necessarily unique among
+				all items in a set. Multiple items may match a given lookup
+				field value.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Optional fields</term>
+			<listitem><para>Certain fields are optional, and may be missing
+				from an item.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Lookup operation</term>
+			<listitem>
+				<para>A lookup operation takes as input: the set, the lookup
+				fields/values, and the identifiers of the fields to return.</para>
+				<para>The returned values and fields are returned for all
+				items matching the lookup fields.</para>
+				<para>No particular order is defined for the returned items.</para>
+				<para>It is possible to do a lookup without specifying any
+				fields to return, merely to check if matching items are in the set.</para>
+				<para>It is not an error for a lookup operation to return no items.</para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Remove operation</term>
+			<listitem>
+				<para>A remove operation takes as input: the set, and the lookup
+				fields/values.</para>
+				<para>All items matching the input are removed from the set.</para>
+				<para>The remove operation is not supported by read-only sets.</para>
+				<para>It is not an error for a remove operation to remove no items.</para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Store operation</term>
+			<listitem>
+				<para>A store operation takes as input: the set, and the
+				fields/values to store.</para>
+				<para>If an item matching all the fields/values already exists
+				in the set, then the item is not added, although this is not an
+				error.</para>
+				<para>The store operation is not supported by read-only sets.</para>
+			</listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>Implementations of the store may have additional capabilities, but must implement
+	the above characteristics and behavior.</para>
+</sect2>
+
+<sect2 id="model-anchors">
+	<title>Set: Anchors</title>
+
+	<para>This is a known set containing anchors to be used in certificate
+	chain validation. The presence of a public key in this data set makes
+	it an anchor.</para>
+
+	<para>Items in the set of anchors contain the following fields:</para>
+
+	<variablelist>
+		<varlistentry>
+			<term>Public Key Info: <emphasis>required, lookup</emphasis></term>
+			<listitem><para>The public key of the anchor. A DER encoded
+			SubjectPublicKeyInfo sequence as defined in X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Subject: <emphasis>optional, lookup</emphasis></term>
+			<listitem><para>The subject DN of the anchor. A DER encoded
+			Name sequence defined in X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Certificate: <emphasis>optional</emphasis></term>
+			<listitem><para>A certificate associated with the anchor. The
+			DER encoded Certificate sequence defined in X.509.</para></listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>Given the above fields and their flags, this set has the following
+	characteristics:</para>
+
+	<itemizedlist>
+		<listitem><para>Anchors are defined as a public key.</para></listitem>
+		<listitem><para>Some, but not all anchors have an associated certificate.</para></listitem>
+		<listitem><para>Some, but not all anchors have an associated subject.</para></listitem>
+		<listitem><para>A single anchor public key can be stored multiple times
+			with different subjects and certificates.</para></listitem>
+	</itemizedlist>
+
+	<para>Implementation notes:</para>
+
+	<itemizedlist>
+		<listitem><para>To determine whether a given public key is an anchor
+			callers should perform a lookup operation on this set using the
+			public key info as the lookup field.</para></listitem>
+		<listitem><para>To determine whether a given certificate is an anchor
+			callers should extract the subjectPublicKeyInfo field of that
+			certificate. Then perform a lookup operation on this set using
+			the public key info as the lookup field.</para></listitem>
+		<listitem><para>If a caller is building a certificate chain, and wishes
+			to find a possible anchor: Perform a lookup operation on this set
+			using the issuer field of the last certificate in
+			the chain as the subject lookup field.</para></listitem>
+		<listitem><para>Callers looking up anchors in the store which are
+			unable to handle anchors that are not certificates, should
+			ignore anchors that do not contain certificates. If multiple
+			results are returned for a lookup, such callers should prefer
+			the result which contains a certificate field.</para></listitem>
+		<listitem><para>Anchors without a subject field are not able to be
+			used when building a certificate chain.</para></listitem>
+		<listitem><para>To change whether a public key or certificate is an anchor
+			or not, it is added or removed from the list of anchors.</para></listitem>
+		<listitem><para>Callers storing anchors in the store, should be aware
+			that certificate and subject fields are desired by many callers,
+			and should store those fields with the anchor if possible.</para></listitem>
+		<listitem><para>In order to be a certificate authority anchor (that is an
+			anchor in a certificate chain with a length longer than one)
+			the BasicConstraints extension must be present with a isCa
+			field set to TRUE. This extension can be present either in
+			the certificate or stapled to it.</para></listitem>
+	</itemizedlist>
+</sect2>
+
+<sect2 id="model-blacklist">
+	<title>Set: Anchors</title>
+
+	<para>This is a known set containing public keys that should never be
+	treated as valid. Items in the blacklist set contain the following fields:</para>
+
+	<variablelist>
+		<varlistentry>
+			<term>Public Key Info: <emphasis>optional, lookup</emphasis></term>
+			<listitem><para>The public key that is blacklisted. A DER encoded
+			SubjectPublicKeyInfo sequence as defined in X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Issuer: <emphasis>optional, lookup</emphasis></term>
+			<listitem><para>The issuer DN of the authority that issued or
+			previously validated the key or a certificate cotnaining the key.
+			A DER encoded Name sequence defined in X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Serial Number: <emphasis>optional, lookup</emphasis></term>
+			<listitem><para>The serial number given by the authority issued or
+			previously validated the key or a certificate containing the key.
+			The DER encoded CertificateSerialNumber field defined in X.509.</para></listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>Given the above fields and their flags, this set has the following
+	characteristics:</para>
+
+	<itemizedlist>
+		<listitem><para>Keys may be black listed by their public key.</para></listitem>
+		<listitem><para>Certificates may be black listed by issuer and serial number.</para></listitem>
+		<listitem><para>A single public key may be blacklisted with different issuer
+			and serial number fields.</para></listitem>
+	</itemizedlist>
+
+	<para>Implementation notes:</para>
+
+	<itemizedlist>
+		<listitem><para>To determine whether a given public key is black listed
+			callers should perform a lookup operation on this set using the
+			public key info as the lookup field.</para></listitem>
+		<listitem><para>Callers which are validating certificate chains should,
+			for all non-root certificates in the chain, perform a lookup
+			on this set using the issuer and serialNumber as lookup
+			fields.</para></listitem>
+		<listitem><para>Callers storing blacklists in the store, should store
+			as much information as is available. If a certificate is available
+			then store all three of the public key info, issuer, and serial number
+			fields. If only issuer and serial number information is available
+			(such as would come from a CRL list) then store those.</para></listitem>
+		<listitem><para>Additionally it is possible to blacklist a certificate by
+			constraining its trust policy with certificate extensions like
+			ExtendedKeyUsage so that it will not validate for any purpose
+			or use case. This is not the recommended approach. Implementors
+			should instead place the certificates on an explicit
+			blacklist.</para></listitem>
+	</itemizedlist>
+</sect2>
+
+<sect2 id="model-stapled">
+	<title>Set: Stapled Extensions</title>
+
+	<para>This is a known set of certificate extensions that should be applied
+	to a public key, which define or adjust trust policy for it. Items in the
+	stapled extensions set contain the following fields:</para>
+
+	<variablelist>
+		<varlistentry>
+			<term>Public Key Info: <emphasis>required, lookup</emphasis></term>
+			<listitem><para>The public key with which the extension is to
+			be used. A DER encoded SubjectPublicKeyInfo sequence as defined
+			in X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Extension: <emphasis>required</emphasis></term>
+			<listitem><para>The extension to define for the public key.
+			A DER encoded Extension sequence defined in X.509.</para></listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>Given the above fields and their flags, this set has the following
+	characteristics:</para>
+
+	<itemizedlist>
+		<listitem><para>Stapled extensions are associated with a public key.</para></listitem>
+		<listitem><para>Multiple stapled extensions may be present for a given public key.</para></listitem>
+	</itemizedlist>
+
+	<para>Implementation notes:</para>
+
+	<itemizedlist>
+		<listitem><para>To lookup all stapled extensions for a given certificate
+			or public key, callers should perform a lookup operation on this
+			set using the public key info as the lookup field.</para></listitem>
+		<listitem><para>Callers which are validating certificate chains should,
+			retrieve all stapled extensions for each certificate in the chain
+			and use those stapled extensions as if they had been present in
+			the respective certificate. If a stapled extension has the same
+			extnID value as one present in the certificate, the stapled
+			certificate extension should be used instead.</para></listitem>
+		<listitem><para>Callers storing stapled extensions in the store, should never
+			store duplicate extensions in the set that contain the same extnID
+			value, just as you would not place multiple extensions in a certificate
+			with the same extnID.</para></listitem>
+		<listitem><para>To change whether a certificate is an authority or not, a
+			stapled BasicConstraints extension is added with the relevant
+			isCa and pathlen fields.</para></listitem>
+		<listitem><para>An ExtendedKeyUsage or KeyUsage stapled extension may
+			be added to a certificate when the system builder or administrator
+			wishes to define or override which purposes a certificate can be
+			used for (eg: server authentication, email, etc.)</para></listitem>
+		<listitem><para>In combination with having a certificate an anchor, these
+			stapled extensions may be used to constrain for what purposes
+			anchors can be used.</para></listitem>
+		<listitem><para>A NameConstraints stapled certificate extension may be
+			added to a certificate when the system builder or administrator
+			wishes to define which end entity names can be signed by a
+			given certificate.</para></listitem>
+	</itemizedlist>
+</sect2>
+
+<sect2 id="model-layering">
+	<title>Store Layering</title>
+
+	<para>Implementations may have multiple stores, each containing the above sets.
+	For example one store may be a read-only system store, and another store may
+	be one editable by the user. Implementations should have a defined order of
+	lookup priority for these multiple stores.</para>
+
+	<para>Callers performing a lookup operation should perform the lookup against
+	each store in turn, using the defined order. Once the lookup operation returns
+	results against a store, it should not continue to on to lower priority stores.
+	In this way items in higher priority stores override information in lower
+	priority stores.</para>
+</sect2>
+
+</sect1>
+
+</article>

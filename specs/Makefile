@@ -1,10 +1,11 @@
 NULL =
 
 STORING_TRUST_FILES = \
-	storing-trust-basics.xml \
+	storing-trust-model.xml \
 	storing-trust-existing.xml \
 	storing-trust-pkcs11.xml \
 	storing-trust-policy.xml \
+	storing-trust-retrofit.xml \
 	$(NULL)
 
 STORING_TRUST_DIR = storing-trust

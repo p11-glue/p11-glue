@@ -2,7 +2,7 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 ]>
 <article id="storing-trust-pkcs11">
-<title>PKCS#11 Extensions for Storing Trust Information</title>
+<title>API: PKCS#11 Extensions</title>
 
 <articleinfo>
 	<releaseinfo>Take two draft</releaseinfo>
@@ -21,7 +21,7 @@
 	</authorgroup>
 </articleinfo>
 
-<sect1 id="pkcs11">
+<sect1>
 	<title>PKCS#11 Extensions for Stapled Certificate Extensions</title>
 
 	<para><ulink url="http://www.cryptsoft.com/pkcs11doc/">PKCS#11</ulink> is a useful
