@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+]>
+<article id="storing-trust-json">
+	<title>Representation: JSON</title>
+
+	<para>Since various browsers already represent trust information as JSON data
+		there is likely a need to have a standard JSON form for the the models
+		described in these documents.</para>
+
+	<para><emphasis>Work item: </emphasis> We need to look at the interested JSON
+		callers and discuss the desired form.  It is undesirable to design an
+		API in a vacuum. Therefore if you are such an interested caller,
+		please contact
+		<ulink url="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</ulink>
+		for discussion.</para>
+
+</article>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+]>
+<article id="storing-trust-dbus">
+	<title>Representation: DBus API</title>
+
+	<para>On the Linux desktop various apps would like to do lookups or modifications
+		of anchor data via DBus. This also facilitates concepts such as
+		privilege escalation (polkit prompting) to modify the system
+		wide trust stores.</para>
+
+	<para><emphasis>Work item: </emphasis> We need to look at the interested DBus
+		callers and discuss the desired form.  It is undesirable to design an
+		API in a vacuum. Therefore if you are such an interested caller,
+		please contact
+		<ulink url="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</ulink>
+		for discussion.</para>
+
+</article>

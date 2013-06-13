@@ -39,6 +39,12 @@
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
 		href="storing-trust-pkcs11.xml"/>
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+		href="storing-trust-c.xml"/>
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+		href="storing-trust-json.xml"/>
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+		href="storing-trust-dbus.xml"/>
+	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
 		href="storing-trust-retrofit.xml"/>
 	<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
 		href="storing-trust-existing.xml"/>

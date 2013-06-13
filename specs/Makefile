@@ -1,6 +1,9 @@
 NULL =
 
 STORING_TRUST_FILES = \
+	storing-trust-c.xml \
+	storing-trust-dbus.xml \
+	storing-trust-json.xml \
 	storing-trust-model.xml \
 	storing-trust-existing.xml \
 	storing-trust-pkcs11.xml \

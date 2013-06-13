@@ -2,7 +2,7 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 ]>
 <article id="storing-trust-pkcs11">
-<title>API: PKCS#11 representation</title>
+<title>Representation: PKCS#11</title>
 
 	<para><ulink url="http://www.cryptsoft.com/pkcs11doc/">PKCS#11</ulink> is a useful
 		and widely supported standard for storage and use of keys and certificates.
@@ -12,7 +12,7 @@
 		for anchors, blacklist, and stapled extensions.</para>
 
 <sect1 id="pkcs11-store">
-	<title>Store model</title>
+	<title>Stores</title>
 
 	<para>We define a trust store using the stardard PKCS#11 object model, with a few
 		new attributes.</para>
@@ -259,7 +259,10 @@
 <sect1 id="pkcs11-constants">
 	<title>Constants</title>
 
-	<para><emphasis>To do</emphasis></para>
+	<para><emphasis>Work item:</emphasis> Define vendor extension constants for the above
+		new attributes. One of the attributes CKA_PUBLIC_KEY_INFO may be standardized
+		by the PKCS#11 TC within the next short while, thus not rushing to do this. Will
+		timeout if not done shortly.</para>
 </sect1>
 
 </article>
