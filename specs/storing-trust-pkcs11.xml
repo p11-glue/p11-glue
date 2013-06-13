@@ -2,81 +2,264 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
 ]>
 <article id="storing-trust-pkcs11">
-<title>API: PKCS#11 Extensions</title>
-
-<articleinfo>
-	<releaseinfo>Take two draft</releaseinfo>
-	<date>June 2013</date>
-	<authorgroup>
-		<author>
-			<firstname>Stef</firstname>
-			<surname>Walter</surname>
-			<affiliation>
-				<orgname>Red Hat Inc.</orgname>
-				<address>
-					<email>stefw@redhat.com</email>
-				</address>
-			</affiliation>
-		</author>
-	</authorgroup>
-</articleinfo>
-
-<sect1>
-	<title>PKCS#11 Extensions for Stapled Certificate Extensions</title>
+<title>API: PKCS#11 representation</title>
 
 	<para><ulink url="http://www.cryptsoft.com/pkcs11doc/">PKCS#11</ulink> is a useful
 		and widely supported standard for storage and use of keys and certificates.
 		It is often used with smart cards.</para>
 
-	<para>Here we outline how to use PKCS#11 as a store of stapled certificate extensions,
-		anchors	and blacklisted certificates. We do this in the stardard PKCS#11
-		object model, by defining a few extra attributes.</para>
+	<para>Here we outline how to use PKCS#11 as a store for trust policy, containing sets
+		for anchors, blacklist, and stapled extensions.</para>
 
-	<para>To make it clear which attributes are defined here and which are standard,
-		all new attributes and values are prefixed by the letters <literal>_X_</literal>. Once
-		standardized they would lose this tag.</para>
+<sect1 id="pkcs11-store">
+	<title>Store model</title>
 
-	<para>The standard CKA_TRUSTED boolean attribute is used on an object with the 
-		class CKO_CERTIFICATE to mark it as an anchor. The presence of a
-		BasicConstraints certificate extension marks it as a certificate
-		authority anchor, capable of anchoring a certificate chain, and not just
-		itself.</para>
+	<para>We define a trust store using the stardard PKCS#11 object model, with a few
+		new attributes.</para>
 
-	<para>We define a new boolean attribute CKA_X_DISTRUSTED. If this is present and
-		set to CK_TRUE on an object with the class CKO_CERTIFICATE, it marks that
-		certificate as being on the blacklist.</para>
+	<variablelist>
+		<varlistentry>
+			<term>Store</term>
+			<listitem><para>Each PKCS#11 token is a store.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Sets</term>
+			<listitem><para>Sets are implemented by using certain PKCS#11 attributes to
+				differentiate between items in various sets.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Items</term>
+			<listitem><para>Items in the sets are represented by PKCS#11 objects.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Fields</term>
+			<listitem>
+				<para>Fields are implemented as various PKCS#11 <literal>CK_ATTRIBUTE</literal>
+				attributes, and the field identifiers are the <literal>CK_ATTRIBUTE_TYPE</literal> type
+				of the attribute.</para>
+				<para>Some fields are standard PKCS#11 attributes, and others are
+				implemented by defining a few extension vendor attributes in the PKCS#11
+				defined fashion. To make it clear which attributes are defined here
+				and which are standard, all new attributes and values are
+				prefixed by the letters <literal>_X_</literal>. Once standardized
+				they would lose this tag.</para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Lookup fields</term>
+			<listitem>
+				<para>In PKCS#11 any field can be used as a lookup field. For speedy
+				lookups it is recommended that implementations internally index the
+				attributes that will be used to lookup trust policy.</para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Optional fields</term>
+			<listitem>
+				<para>Optional fields are implemented as an empty zero-length
+				<literal>CK</literal> value when the field is not present.</para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Lookup operation</term>
+			<listitem>
+				<para>A lookup operation is implemented using the 
+				<literal>C_FindObjectsInit()</literal>  <literal>C_FindObjects()</literal>
+				PKCS#11 functions.</para>
+				<para>The set to lookup is specified by passing certain set specific
+				attributes, defined below, as part of the <literal>C_FindObjectsInit()</literal>
+				find template.</para>
+				<para>The fields to lookup are also passed as part of the 
+				<literal>C_FindObjectsInit()</literal> find template.</para>
+				<para>If there are fields for which values need to be retrieved, the
+				<literal>C_GetAttributeValue()</literal> function should be used to retrieve
+				them on each of the objects matched by <literal>C_FindObjects()</literal>.</para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Remove operation</term>
+			<listitem>
+				<para>A remove operation is implemented using the 
+				<literal>C_FindObjectsInit()</literal>  <literal>C_FindObjects()</literal>
+				PKCS#11 functions, in the same way as a in the lookup operation described
+				above.</para>
+				<para>The <literal>C_DestroyObject()</literal> function should be used to
+				remove the objects matched by the <literal>C_FindObjects()</literal>
+				function.</para>
+				<para>Another concurrent operation may have also removed an item. Do not
+				propogate <literal>CKR_OBJECT_HANDLE_INVALID</literal> return codes from
+				the <literal>C_DestroyObject()</literal> function.</para>
+				<para>Callers may consult the standard PKCS#11 <literal>CK_TOKEN_INFO</literal>
+				<literal>CKF_TOKEN_WRITE_PROTECTED</literal> flag, and object
+				<literal>CKA_MODIFIABLE</literal> attribute to determine whether items
+				may be removed.</para>
+			</listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>Store operation</term>
+			<listitem>
+				<para>A store operation is implemented using the <literal>C_CreateObject()</literal>
+				PKCS#11 function.</para>
+				<para>The set to store the item in is specified by passing certain
+				set specific attributes, defined below, as part of the
+				<literal>C_CreteObject()</literal> attribute template.</para>
+				<para>The fields to store are also passed as part of the
+				<literal>C_CreateObject()</literal> attribute template.</para>
+				<para>Implementors of the <literal>C_CreateObject()</literal> function should
+				check for another item that matches the relevant fields for the set in question.
+				If one exists the existing handle should be returned, rather than storing a
+				duplicate object.</para>
+				<para>Callers may consult the standard PKCS#11 <literal>CK_TOKEN_INFO</literal>
+				<literal>CKF_TOKEN_WRITE_PROTECTED</literal> flag to determine whether items
+				may be stored.</para>
+			</listitem>
+		</varlistentry>
+	</variablelist>
 
-	<para>A new object class is defined of type CKO_X_CERTIFICATE_EXTENSION. Each 
+</sect1>
+
+<sect1 id="pkcs11-anchors">
+	<title>Set: Anchors</title>
+
+	<para>The standard <literal>CKA_TRUSTED</literal> boolean attribute is used
+		to define a certificate or public key as an anchor.</para>
+
+	<para>The following attribute is set on items that are part of the
+		set of anchors:</para>
+
+	<variablelist>
+		<varlistentry>
+			<term><literal>CKA_TRUSTED</literal></term>
+			<listitem><para>Value: <literal>CK_TRUE</literal></para></listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>Items in the set of anchors contain the following fields:</para>
+
+	<variablelist>
+		<varlistentry>
+			<term><literal>CKA_X_PUBLIC_KEY_INFO</literal></term>
+			<listitem><para>The public key of the anchor, always present. A DER encoded
+			SubjectPublicKeyInfo sequence as defined in X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_SUBJECT</literal></term>
+			<listitem><para>The subject DN of the anchor. Contents as defined in
+			PKCS#11: a DER encoded Name sequence defined in X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_CLASS</literal></term>
+			<listitem><para>Set to <literal>CKO_CERTIFICATE</literal> when the
+			stored item is a certificate, and <literal>CKO_PUBLIC_KEY</literal>
+			when it doesn't.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_VALUE</literal></term>
+			<listitem><para>When the stored item is a certificate
+			(it has a <literal>CKA_CLASS</literal> of <literal>CKO_CERTIFICATE</literal>,
+			see above) this attribute stores the DER encoded Certificate
+			sequence defined in X.509.</para></listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>Other standard PKCS#11 fields should be present on the objects as per
+		the <literal>CKA_CLASS</literal> attribute.</para>
+
+	<para>Note that the presence of a BasicConstraints extension marks it as a
+		certificate authority anchor, capable of anchoring a certificate chain,
+		and not just itself.</para>
+</sect1>
+
+<sect1 id="pkcs11-blacklist">
+	<title>Set: Blacklist</title>
+
+	<para>We define a new boolean attribute CKA_X_DISTRUSTED to indicate
+		blacklist status.</para>
+
+	<para>The following attribute is set on items that are part of the
+		blacklist set:</para>
+
+	<variablelist>
+		<varlistentry>
+			<term><literal>CKA_X_DISTRUSTED</literal></term>
+			<listitem><para>Value: <literal>CK_TRUE</literal></para></listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>Items in the blacklist set contain the following fields:</para>
+
+	<variablelist>
+		<varlistentry>
+			<term><literal>CKA_X_PUBLIC_KEY_INFO</literal></term>
+			<listitem><para>The public key of the anchor. A DER encoded
+			SubjectPublicKeyInfo sequence as defined in X.509. When this
+			value is not present, set to a zero length value.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_ISSUER</literal></term>
+			<listitem><para>The DN of the issuer. Contents as defined in
+			PKCS#11: a DER encoded Name sequence defined in X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_SERIAL_NUMBER</literal></term>
+			<listitem><para>The serial number assigned by the issuer. Contents
+			as defined in PKCS#11: a DER encoded Name sequence defined in
+			X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_CLASS</literal></term>
+			<listitem><para>Set to <literal>CKO_CERTIFICATE</literal> when the
+			<literal>CKA_ISSUER</literal> and <literal>CKA_SERIAL</literal> are\
+			present. Otherwise may be set to either <literal>CKO_PUBLIC_KEY</literal>
+			or <literal>CKO_CERTIFICATE</literal> as appropriate.</para></listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>Other standard PKCS#11 fields should be present on the objects as per
+		the <literal>CKA_CLASS</literal> attribute.</para>
+</sect1>
+
+<sect1>
+	<title>Set: Stapled Extensions</title>
+
+	<para>A new object class is defined of type <literal>CKO_X_CERTIFICATE_EXTENSION</literal>. Each 
 		object of this class represents one stapled certificate extension. It
 		contains the following (standard and newly defined) attributes (in addition
 		to the standard data storage attributes):</para>
 
+	<para>The following attribute is set on items that are part of the
+		set of stapled extensions:</para>
+
 	<variablelist>
-	<varlistentry>
-		<term>CKA_ID</term>
-		<listitem><para>The arbitrary byte string identifier of a
-			CKO_X_CERTIFICATE_EXTENSION must match the CKA_ID of the
-			CKO_CERTIFICATE which it is stapled to. This reflects the
-			customary PKCS#11 method of associating certificates and
-			keys. Must be set.</para></listitem>
-	</varlistentry>
-	<varlistentry>
-		<term>CKA_OBJECT_ID</term>
-		<listitem><para>The DER-encoded OID of the stapled certificate
-			extension. Must be set.</para></listitem>
-	</varlistentry>
-	<varlistentry>
-		<term>CKA_X_CRITICAL</term>
-		<listitem><para>A CK_BBOOL value indicating whether the extension
-			is critical or not. Defaults to CK_FALSE if not set.</para></listitem>
-	</varlistentry>
-	<varlistentry>
-		<term>CKA_VALUE</term>
-		<listitem><para>The DER encoded value of the certificate extension.
-			Must be set.</para></listitem>
-	</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_CLASS</literal></term>
+			<listitem><para>Value: <literal>CKO_X_CERTIFICATE_EXTENSION</literal></para></listitem>
+		</varlistentry>
 	</variablelist>
 
+	<variablelist>
+		<varlistentry>
+			<term><literal>CKA_X_PUBLIC_KEY_INFO</literal></term>
+			<listitem><para>The public key associated with the stapled
+			extension. A DER encoded SubjectPublicKeyInfo sequence as defined in
+			X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term>CKA_VALUE</term>
+			<listitem><para>The DER encoded value of the Extension sequence as
+				defined in X.509</para></listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>In addition the PKCS#11 <emphasis>Common Storage Object Attributes</emphasis> may
+	be present, as well as the <literal>CKA_ID</literal> attribute.</para>
+
+</sect1>
+
+<sect1 id="pkcs11-constants">
+	<title>Constants</title>
+
+	<para><emphasis>To do</emphasis></para>
 </sect1>
 
 </article>
