@@ -13,8 +13,8 @@ html:
 upload: all
 	rsync -Hvax --exclude doc --exclude releases \
 		html/./* anarchy.freedesktop.org:/srv/p11-glue.freedesktop.org/www/./
-	rsync -v --progress \
-		specs/storing-trust/./ \
-		anarchy.freedesktop.org:/srv/p11-glue.freedesktop.org/www/doc/sharing-trust-policy/./
+	rsync -Hvax \
+		specs/storing-trust/./* \
+		anarchy.freedesktop.org:/srv/p11-glue.freedesktop.org/www/doc/storing-trust-policy/./
 
 .PHONY: html specs
