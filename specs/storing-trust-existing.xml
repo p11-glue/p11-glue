@@ -46,90 +46,105 @@
 
 		<variablelist>
 		<varlistentry>
-			<term>CKA_CLASS</term>
-			<listitem><para>CKO_NETSCAPE_TRUST.</para></listitem>
+			<term><literal>CKA_CLASS</literal></term>
+			<listitem><para><literal>CKO_NSS_TRUST</literal></para></listitem>
 		</varlistentry>
 		<varlistentry>
-			<term>CKA_CERT_SHA1_HASH</term>
+			<term><literal>CKA_CERT_SHA1_HASH</literal></term>
 			<listitem><para>A SHA1 hash of the DER encoded X.509
 				certificate to which this trust object's policy
 				applies.</para></listitem>
 		</varlistentry>
 		<varlistentry>
-			<term>CKA_CERT_MD5_HASH</term>
+			<term><literal>CKA_CERT_MD5_HASH</literal></term>
 			<listitem><para>An MD5 hash of the DER encoded X.509
 				certificate to which this trust object's policy
 				applies.</para></listitem>
 		</varlistentry>
 		<varlistentry>
-			<term>CKA_ISSUER</term>
+			<term><literal>CKA_ISSUER</literal></term>
 			<listitem><para>The DER encoding of the issuer of the
 				X.509 certificate to which trust object's policy
 				applies.</para></listitem>
 		</varlistentry>
 		<varlistentry>
-			<term>CKA_SUBJECT</term>
+			<term><literal>CKA_SUBJECT</literal></term>
 			<listitem><para>The DER encoding of the subject of the
 				X.509 certificate to which trust object's policy
 				applies.</para></listitem>
 		</varlistentry>
 		<varlistentry>
-			<term>CKA_SERIAL_NUMBER</term>
+			<term><literal>CKA_SERIAL_NUMBER</literal></term>
 			<listitem><para>The DER encoding of the serial number of the
 				X.509 certificate to which trust object's policy
 				applies.</para></listitem>
 		</varlistentry>
 		</variablelist>
-			<para>The NSS trust object then contains the following usage attributes.
+
+		<para>The NSS trust object then contains the following usage attributes.
 			Together these roughly represent the KeyUsage and ExtendedKeyUsage
 			certificate extensions, as out-of-band trust policy. The names should be
 			self explanatory for readers familiar with those certifiacte
 			extensions.</para>
-			<itemizedlist>
-		<listitem><para>CKA_TRUST_DIGITAL_SIGNATURE</para></listitem>
-		<listitem><para>CKA_TRUST_NON_REPUDIATION</para></listitem>
-		<listitem><para>CKA_TRUST_KEY_ENCIPHERMENT</para></listitem>
-		<listitem><para>CKA_TRUST_DATA_ENCIPHERMENT</para></listitem>
-		<listitem><para>CKA_TRUST_KEY_AGREEMENT</para></listitem>
-		<listitem><para>CKA_TRUST_KEY_CERT_SIGN</para></listitem>
-		<listitem><para>CKA_TRUST_CRL_SIGN</para></listitem>
-		<listitem><para>CKA_TRUST_SERVER_AUTH</para></listitem>
-		<listitem><para>CKA_TRUST_CLIENT_AUTH</para></listitem>
-		<listitem><para>CKA_TRUST_CODE_SIGNING</para></listitem>
-		<listitem><para>CKA_TRUST_EMAIL_PROTECTION</para></listitem>
-		<listitem><para>CKA_TRUST_IPSEC_END_SYSTEM</para></listitem>
-		<listitem><para>CKA_TRUST_IPSEC_TUNNEL</para></listitem>
-		<listitem><para>CKA_TRUST_IPSEC_USER</para></listitem>
-		<listitem><para>CKA_TRUST_TIME_STAMPING</para></listitem>
+
+		<itemizedlist>
+		<listitem><para><literal>CKA_TRUST_DIGITAL_SIGNATURE</literal></para></listitem>
+		<listitem><para><literal>CKA_TRUST_NON_REPUDIATION</literal></para></listitem>
+		<listitem><para><literal>CKA_TRUST_KEY_ENCIPHERMENT</literal></para></listitem>
+		<listitem><para><literal>CKA_TRUST_DATA_ENCIPHERMENT</literal></para></listitem>
+		<listitem><para><literal>CKA_TRUST_KEY_AGREEMENT</literal></para></listitem>
+		<listitem><para><literal>CKA_TRUST_KEY_CERT_SIGN</literal></para></listitem>
+		<listitem><para><literal>CKA_TRUST_CRL_SIGN</literal></para></listitem>
+		<listitem><para><literal>CKA_TRUST_SERVER_AUTH</literal></para></listitem>
+		<listitem><para><literal>CKA_TRUST_CLIENT_AUTH</literal></para></listitem>
+		<listitem><para><literal>CKA_TRUST_CODE_SIGNING</literal></para></listitem>
+		<listitem><para><literal>CKA_TRUST_EMAIL_PROTECTION</literal></para></listitem>
 		</itemizedlist>
-		
+
 		<para>The above usage attributes each can contain a trust setting, one of the
 			following:</para>
 
 		<variablelist>
 		<varlistentry>
-			<term>CKT_NETSCAPE_TRUSTED</term>
+			<term><literal>CKT_NSS_TRUSTED</literal></term>
 			<listitem><para>The certificate is trusted for this
 				usage.</para></listitem>
 		</varlistentry>
 		<varlistentry>
-			<term>CKT_NETSCAPE_TRUSTED_DELEGATOR</term>
-			<listitem><para>The certificate is trusted as a certificate
-					authority for this usage.</para></listitem>
+			<term><literal>CKT_NSS_TRUSTED_DELEGATOR</literal></term>
+			<listitem>
+				<para>The certificate is trusted anchor as a certificate
+				authority for the usages.</para>
+				<para>In NSS the trusted anchor does not have to be
+				self-signed. You can explicitly trust an intermediate
+				certificate as if it were a trusted anchor.</para>
+			</listitem>
 		</varlistentry>
 		<varlistentry>
-			<term>CKT_NETSCAPE_UNTRUSTED</term>
-			<listitem><para>The certificate is explicitly distrusted for
-				this usage.</para></listitem>
+			<term><literal>CKT_NSS_NOT_TRUSTED</literal></term>
+			<listitem><para>This certificate is explicitly not trusted: neither
+				for the given usage, nor as a delegator of the given
+				usage.</para></listitem>
 		</varlistentry>
 		<varlistentry>
-			<term>CKT_NETSCAPE_MUST_VERIFY</term>
-			<listitem><para>TODO: Unclear what this means.</para></listitem>
+			<term><literal>CKT_NSS_MUST_VERIFY_TRUST</literal></term>
+			<listitem>
+				<para>The certificate is not a trusted anchor (even
+				if a later trust record in another PKCS #11 module says
+				this cert should be trusted). If the marked certificate is
+				self-signed, then this is semantically equivalent to
+				<literal>CKT_NSS_NOT_TRUSTED</literal>, except NSS will return
+				a different error code (<emphasis>unknown CA</emphasis> for
+				<literal>CKT_NSS_MUST_VERIFY_TRUST</literal>
+				versus <emphasis>untrusted CA</emphasis> for
+				<literal>CKT_NSS_NOT_TRUSTED</literal>).</para>
+			</listitem>
 		</varlistentry>
 		<varlistentry>
-			<term>CKT_NETSCAPE_TRUST_UNKNOWN</term>
-			<listitem><para>The certificate trust is unknown for this usage
-				and should come from another source.</para></listitem>
+			<term><literal>CKT_NSS_TRUST_UNKNOWN</literal></term>
+			<listitem><para>This record does not explictily provide trust one
+				way or the other. If there is another trust record for this
+				cert in another PKCS #11 module, use it.</para></listitem>
 		</varlistentry>
 		</variablelist>
 
@@ -143,13 +158,8 @@
 				in the following ways:</para>
 
 			<itemizedlist>
-			<listitem><para>Mandates the use SHA1 and MD5 hashes both of which are
-				cryptographically broken in various ways
-					<footnote><para>Neither
-						<ulink url='http://tools.ietf.org/html/draft-turner-md5-seccon-update-07'>MD5</ulink>
-						nor <ulink url='https://tools.ietf.org/html/draft-turner-sha0-sha1-seccon-00'>SHA1</ulink>
-						are currently recommended for use in specifications.</para></footnote>
-				.</para></listitem>
+			<listitem><para>Makes use SHA1 and MD5 hashes both of which are
+				aging cryptographically.</para></listitem>
 			<listitem><para>Trust objects only support trust policy related to
 				the KeyUsage, ExtendedKeyUsage and parts of the BasicConstraints
 				certificate extensions.</para></listitem>
@@ -171,7 +181,7 @@
 	<sect2 id="openssl-trusted">
 		<title>OpenSSL Trusted Certificates</title>
 		<para>OpenSSL contains a representation of out-of-band trust policy in its 
-			<emphasis>TRUSTED CERTIFICATE</emphasis> PEM blocks aka. CertAux.
+			<literal>TRUSTED CERTIFICATE</literal> PEM blocks aka. CertAux.
 			Files containing this information can be manipulated using 
 			its <command>openssl x509</command> tool.</para>
 
@@ -179,11 +189,11 @@
 			to document it here.</para>
 
 		<para>PEM files contain a header and footer containing the words
-			<emphasis>TRUSTED CERTIFICATE</emphasis>. Contained in the PEM
+			<literal>TRUSTED CERTIFICATE</literal>. Contained in the PEM
 			data are two DER sequences. The first is an X.509 certificate,
 			and the latter is a structure known internally as <literal>X509_CERT_AUX</literal>.</para>
 
-		<para>The X509_CERT_AUX DER sequence may be defined as follows:
+		<para>The <literal>X509_CERT_AUX</literal> DER sequence may be defined as follows:
 <programlisting>
 CertAux ::= SEQUENCE {
       trust      SEQUENCE OF OBJECT IDENTIFIER OPTIONAL,
