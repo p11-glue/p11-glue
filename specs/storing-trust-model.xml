@@ -343,7 +343,7 @@
 </sect2>
 
 <sect2 id="model-blacklist">
-	<title>Set: Anchors</title>
+	<title>Set: Blacklist</title>
 
 	<para>This is a known set containing public keys that should never be
 	treated as valid. Items in the blacklist set contain the following fields:</para>
