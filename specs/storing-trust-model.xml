@@ -120,7 +120,7 @@
 	<para>X.509 certificate extensions usually define the ways that a certificate
 		can be used to represent trust policy. Usually these
 		certificate extensions are internal to the certificate, and are signed
-		by the key holder of the certificate.</para>
+		by the issuer of the certificate.</para>
 
 	<para>By associating additional certificate extensions to a public key or
 		X.509 certificate we can represent out-of-band trust policy, as defined
