@@ -477,6 +477,13 @@
 	results against a store, it should not continue to on to lower priority stores.
 	In this way items in higher priority stores override information in lower
 	priority stores.</para>
+
+	<para>If a public key or certificate is both in the set of anchors and the
+	blacklist set, then the caller should treat it as black listed. This means that both
+	the anchors and blacklist sets in a given store should be consulted when
+	validating certificates or keys. However again, as noted above, once a store
+	returns results for a key, stores with a lower priority should not be consulted
+	for trust information about that key.</para>
 </sect2>
 
 </sect1>
