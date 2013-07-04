@@ -237,6 +237,8 @@
 		</varlistentry>
 	</variablelist>
 
+	<para>Items in the set of stapled extensions set contain the following fields:</para>
+
 	<variablelist>
 		<varlistentry>
 			<term><literal>CKA_X_PUBLIC_KEY_INFO</literal></term>
@@ -247,7 +249,14 @@
 		<varlistentry>
 			<term><literal>CKA_VALUE</literal></term>
 			<listitem><para>The DER encoded value of the Extension sequence as
-				defined in X.509</para></listitem>
+				defined in X.509. Note that this is the entire Extension
+				sequence and not just the extnValue field.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_OBJECT_ID</literal></term>
+			<listitem><para>The DER-encoded OID of the stapled certificate
+			extension. This is the exact contents of the extnID field in the
+			Extension sequence.</para></listitem>
 		</varlistentry>
 	</variablelist>
 
