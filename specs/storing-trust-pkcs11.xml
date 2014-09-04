@@ -138,7 +138,7 @@
 
 	<variablelist>
 		<varlistentry>
-			<term><literal>CKA_X_PUBLIC_KEY_INFO</literal></term>
+			<term><literal>CKA_PUBLIC_KEY_INFO</literal></term>
 			<listitem><para>The public key of the anchor, always present. A DER encoded
 			SubjectPublicKeyInfo sequence as defined in X.509.</para></listitem>
 		</varlistentry>
@@ -190,7 +190,7 @@
 
 	<variablelist>
 		<varlistentry>
-			<term><literal>CKA_X_PUBLIC_KEY_INFO</literal></term>
+			<term><literal>CKA_PUBLIC_KEY_INFO</literal></term>
 			<listitem><para>The public key of the anchor. A DER encoded
 			SubjectPublicKeyInfo sequence as defined in X.509. When this
 			value is not present, set to a zero length value.</para></listitem>
@@ -241,7 +241,7 @@
 
 	<variablelist>
 		<varlistentry>
-			<term><literal>CKA_X_PUBLIC_KEY_INFO</literal></term>
+			<term><literal>CKA_PUBLIC_KEY_INFO</literal></term>
 			<listitem><para>The public key associated with the stapled
 			extension. A DER encoded SubjectPublicKeyInfo sequence as defined in
 			X.509.</para></listitem>
@@ -268,13 +268,17 @@
 <simplesect id="pkcs11-constants">
 	<title>Constants</title>
 
-	<note>
-		<title>Work Item</title>
-		<para>Define vendor extension constants for the above
-		new attributes. One of the attributes CKA_PUBLIC_KEY_INFO may be standardized
-		by the PKCS#11 TC within the next short while, thus not rushing to do this. Will
-		timeout if not done shortly.</para>
-	</note>
+	<para>The following constants are defined:</para>
+
+<programlisting>
+<![CDATA[
+#define CKO_X_CERTIFICATE_EXTENSION   0xd84447c8UL
+#define CKA_X_DISTRUSTED              0xd8444764UL
+
+/* The following definition comes from PKCS#11 2.40
+#define CKA_PUBLIC_KEY_INFO           0x00000129UL
+]]>
+</programlisting>
 
 </simplesect>
 
