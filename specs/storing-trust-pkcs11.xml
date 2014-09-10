@@ -9,7 +9,7 @@
 		It is often used with smart cards.</para>
 
 	<para>Here we outline how to use PKCS#11 as a store for trust policy, containing sets
-		for anchors, blacklist, and stapled extensions.</para>
+		for anchors, blacklist, and attached extensions.</para>
 
 <simplesect id="pkcs11-store">
 	<title>Store representation</title>
@@ -220,15 +220,15 @@
 </simplesect>
 
 <simplesect>
-	<title>Set: Stapled Extensions</title>
+	<title>Set: Attached Extensions</title>
 
 	<para>A new object class is defined of type <literal>CKO_X_CERTIFICATE_EXTENSION</literal>. Each 
-		object of this class represents one stapled certificate extension. It
+		object of this class represents one attached certificate extension. It
 		contains the following (standard and newly defined) attributes (in addition
 		to the standard data storage attributes):</para>
 
 	<para>The following attribute is set on items that are part of the
-		set of stapled extensions:</para>
+		set of attached extensions:</para>
 
 	<variablelist>
 		<varlistentry>
@@ -237,12 +237,12 @@
 		</varlistentry>
 	</variablelist>
 
-	<para>Items in the set of stapled extensions set contain the following fields:</para>
+	<para>Items in the set of attached extensions set contain the following fields:</para>
 
 	<variablelist>
 		<varlistentry>
 			<term><literal>CKA_PUBLIC_KEY_INFO</literal></term>
-			<listitem><para>The public key associated with the stapled
+			<listitem><para>The public key associated with the attached
 			extension. A DER encoded SubjectPublicKeyInfo sequence as defined in
 			X.509.</para></listitem>
 		</varlistentry>
@@ -254,7 +254,7 @@
 		</varlistentry>
 		<varlistentry>
 			<term><literal>CKA_OBJECT_ID</literal></term>
-			<listitem><para>The DER-encoded OID of the stapled certificate
+			<listitem><para>The DER-encoded OID of the attached certificate
 			extension. This is the exact contents of the extnID field in the
 			Extension sequence.</para></listitem>
 		</varlistentry>

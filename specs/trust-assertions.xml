@@ -34,7 +34,7 @@
 
 		<para>Further work on this topic continues under the
 			<ulink url="http://p11-glue.freedesktop.org/doc/sharing-trust-policy/">Sharing Trust Policy</ulink> specification, including the concept of
-			Stapled Certificate Extensions.</para>
+			Attached Certificate Extensions.</para>
 	</section>
 
 	<section id="introduction">

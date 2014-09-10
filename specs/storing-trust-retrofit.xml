@@ -40,7 +40,7 @@
 	<title>Retrofit: NSS trust objects</title>
 
 	<para>It is possible to model NSS PKCS#11 trust objects on top of an underlying storage
-		based on stapled certificate extensions. This will only enforce the KeyUsage
+		based on attached certificate extensions. This will only enforce the KeyUsage
 		and ExtendedKeyUsage extensions. Blacklists are modeled by marking all usages
 		as untrusted.</para>
 </sect1>
@@ -48,7 +48,7 @@
 <sect1 id="rerofit-openssl-x509-store">
 	<title>Retrofit: OpenSSL X509_STORE</title>
 	<para>It is possible to model an OpenSSL X509_STORE implementation on top of an
-		underlying storage based on stapled certificate extensions. This will only
+		underlying storage based on attached certificate extensions. This will only
 		enforce the ExtendedKeyUsage extensions. Blacklists are enforced by rejecting all
 		usages.</para>
 </sect1>

@@ -114,8 +114,8 @@
 		This document wishes to define such a standard.</para>
 </sect2>
 
-<sect2 id="concept-stapled">
-	<title>About Stapled Extensions</title>
+<sect2 id="concept-attached">
+	<title>About Attached Extensions</title>
 
 	<para>X.509 certificate extensions usually define the ways that a certificate
 		can be used to represent trust policy. Usually these
@@ -126,29 +126,29 @@
 		X.509 certificate we can represent out-of-band trust policy, as defined
 		by a system builder, administrator or user.</para>
 
-	<para>We will refer to these additional extensions as <emphasis>Stapled
+	<para>We will refer to these additional extensions as <emphasis>Attached
 		Extensions</emphasis>.</para>
 
-	<para>When both standard X.509 certificate extensions and stapled extensions are
-		present, the stapled extension is to be used instead of the certificate
-		extension with the same OID in the certificate itself. In this way stapled
+	<para>When both standard X.509 certificate extensions and attached extensions are
+		present, the attached extension is to be used instead of the certificate
+		extension with the same OID in the certificate itself. In this way attached
 		certificate extensions override policy defined in the certificate, if any.</para>
 
 	<para>This has the implication that if only one portion of a certificate extension
-		needs to be adjusted by a stapled certificate extension, that entire
+		needs to be adjusted by a attached certificate extension, that entire
 		extension will be overridden for that certificate. This is intentional. Each extension
 		that contains trust policy should be treated as a whole unit of trust
 		policy. This includes changing the critical field of an extension.
 		This is part of the whole.</para>
 
-	<para>For each certificate, there may not be more than one stapled certificate extension of a given
+	<para>For each certificate, there may not be more than one attached certificate extension of a given
 		identifier or type. There is no way to automatically merge certificate
-		extensions. It may be possible for applications which store stapled
+		extensions. It may be possible for applications which store attached
 		certificate extensions (such as a management interface) to merge certain
 		extensions in some way. However that is out of the scope of this
 		document.</para>
 
-	<para>Stapled certificate extensions are associated with the subject public key info
+	<para>Attached certificate extensions are associated with the subject public key info
 		of the anchor or certificate.</para>
 </sect2>
 
@@ -338,7 +338,7 @@
 			anchor in a certificate chain with a length longer than one)
 			the BasicConstraints extension must be present with a isCa
 			field set to TRUE. This extension can be present either in
-			the certificate or stapled to it.</para></listitem>
+			the certificate or attached to it.</para></listitem>
 	</itemizedlist>
 </sect2>
 
@@ -402,12 +402,12 @@
 	</itemizedlist>
 </sect2>
 
-<sect2 id="model-stapled">
-	<title>Set: Stapled Extensions</title>
+<sect2 id="model-attached">
+	<title>Set: Attached Extensions</title>
 
 	<para>This is a known set of certificate extensions that should be applied
 	to a public key, which define or adjust trust policy for it. Items in the
-	stapled extensions set contain the following fields:</para>
+	attached extensions set contain the following fields:</para>
 
 	<variablelist>
 		<varlistentry>
@@ -427,37 +427,37 @@
 	characteristics:</para>
 
 	<itemizedlist>
-		<listitem><para>Stapled extensions are associated with a public key.</para></listitem>
-		<listitem><para>Multiple stapled extensions may be present for a given public key.</para></listitem>
+		<listitem><para>Attached extensions are associated with a public key.</para></listitem>
+		<listitem><para>Multiple attached extensions may be present for a given public key.</para></listitem>
 	</itemizedlist>
 
 	<para>Implementation notes:</para>
 
 	<itemizedlist>
-		<listitem><para>To lookup all stapled extensions for a given certificate
+		<listitem><para>To lookup all attached extensions for a given certificate
 			or public key, callers should perform a lookup operation on this
 			set using the public key info as the lookup field.</para></listitem>
 		<listitem><para>Callers which are validating certificate chains should,
-			retrieve all stapled extensions for each certificate in the chain
-			and use those stapled extensions as if they had been present in
-			the respective certificate. If a stapled extension has the same
-			extnID value as one present in the certificate, the stapled
+			retrieve all attached extensions for each certificate in the chain
+			and use those attached extensions as if they had been present in
+			the respective certificate. If an attached extension has the same
+			extnID value as one present in the certificate, the attached
 			certificate extension should be used instead.</para></listitem>
-		<listitem><para>Callers storing stapled extensions in the store, should never
+		<listitem><para>Callers storing attached extensions in the store, should never
 			store duplicate extensions in the set that contain the same extnID
 			value, just as you would not place multiple extensions in a certificate
 			with the same extnID.</para></listitem>
-		<listitem><para>To change whether a certificate is an authority or not, a
-			stapled BasicConstraints extension is added with the relevant
+		<listitem><para>To change whether a certificate is an authority or not, an
+			attached BasicConstraints extension is added with the relevant
 			isCa and pathlen fields.</para></listitem>
-		<listitem><para>An ExtendedKeyUsage or KeyUsage stapled extension may
+		<listitem><para>An ExtendedKeyUsage or KeyUsage attached extension may
 			be added to a certificate when the system builder or administrator
 			wishes to define or override which purposes a certificate can be
 			used for (eg: server authentication, email, etc.)</para></listitem>
 		<listitem><para>In combination with having a certificate an anchor, these
-			stapled extensions may be used to constrain for what purposes
+			attached extensions may be used to constrain for what purposes
 			anchors can be used.</para></listitem>
-		<listitem><para>A NameConstraints stapled certificate extension may be
+		<listitem><para>A NameConstraints attached certificate extension may be
 			added to a certificate when the system builder or administrator
 			wishes to define which end entity names can be signed by a
 			given certificate.</para></listitem>
