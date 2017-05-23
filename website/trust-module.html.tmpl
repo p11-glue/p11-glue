@@ -37,7 +37,6 @@ subdirectory:</p>
 <pre>
 $ git clone https://github.com/p11-glue/p11-kit
 $ cd p11-kit
-$ cd trust/
 </pre>
 
 <h2>Status</h2>
@@ -48,14 +47,14 @@ tool is also implemented.</p>
 
 <pre>
 $ sh autogen.sh --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib64 --enable-debug \
-	--with-system-anchors=/etc/pki/tls/certs/ca-bundle.trust.crt:/etc/pki/tls/certs/anchors
+	--with-trust-paths=/etc/pki/ca-trust/source:/usr/share/pki/ca-trust-source
 $ make
 $ sudo make install
 $ sudo mv -v /usr/lib64/libnssckbi.so /opt/libnssckbi.so.orig-nss
 $ sudo ln -sv pkcs11/p11-kit-trust.so /usr/lib64/libnssckbi.so
 </pre>
 
-<p>Now place some certificates in the <tt>--with-system-anchors</tt> location(s).
+<p>Now place some certificates in the <tt>--with-trust-paths</tt> location(s).
 Right now, as input, you can use DER, PEM or OpenSSL style 'trusted
 certificates'.</p>
 
@@ -63,7 +62,7 @@ certificates'.</p>
 
 <pre>
 $ openssl x509 -addtrust serverAuth -addreject clientAuth \
-	-in /path/to/my-ca.pem -out /etc/pki/tls/certs/anchors/my-ca.pem
+	-in /path/to/my-ca.pem -out /etc/pki/ca-trust/source/anchors/my-ca.pem
 </pre>
 
 <p>Now you can run apps like Firefox and see the certificates appear in the
