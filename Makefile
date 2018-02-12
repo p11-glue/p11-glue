@@ -14,6 +14,8 @@ html:
 	fi
 	cd p11-kit-copy && git clean -f && git pull && ./autogen.sh && ./configure --enable-doc && make -j8 && cd ..
 	rsync -Hvax --exclude doc --exclude build p11-kit-copy/doc/manual/html/ html/manual/
+	test -d html/doc || mkdir html/doc
+	rsync -Hvax specs/storing-trust/ html/doc/storing-trust-policy
 
 upload: all
 	-git branch -D tmp-web-pages
