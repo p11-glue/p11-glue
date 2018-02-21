@@ -3,3 +3,6 @@ html
 specs/storing-trust
 .project
 .cproject
+p11-kit-copy
+.html.stamp
+.p11-kit.stamp*

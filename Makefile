@@ -1,5 +1,5 @@
 
-all: specs html
+all: specs .html.stamp
 
 clean:
 	rm -rf html/*
@@ -7,23 +7,33 @@ clean:
 specs:
 	make -C specs all
 
-html:
+.p11-kit.stamp-tmp:
+	git submodule update --init
+	git submodule status >$@
+
+.p11-kit.stamp: .p11-kit.stamp-tmp
+	cmp .p11-kit.stamp-tmp $@ || mv .p11-kit.stamp-tmp $@
+
+.html.stamp: .p11-kit.stamp
+	rm -rf html/*
 	SRCDIR="." python jinja2-build.py
-	if ! test -d p11-kit-copy;then \
-		git clone --depth 1 https://github.com/p11-glue/p11-kit.git p11-kit-copy; \
-	fi
-	cd p11-kit-copy && git clean -f && git pull && ./autogen.sh && ./configure --enable-doc && make -j8 && cd ..
-	rsync -Hvax --exclude doc --exclude build p11-kit-copy/doc/manual/html/ html/manual/
+	cd p11-kit-copy && ./autogen.sh && ./configure --enable-doc && make -j8 && cd ..
+	mkdir -p html/p11-kit
+	rsync -Hvax --exclude doc --exclude build p11-kit-copy/doc/manual/html/ html/p11-kit/manual/
+	ln -t html -s p11-kit/manual manual || true
 	test -d html/doc || mkdir html/doc
 	rsync -Hvax specs/storing-trust/ html/doc/storing-trust-policy
+	touch $@
 
-upload: all
+upload: .html.stamp
 	-git branch -D tmp-web-pages
+	-git branch -D gh-pages
 	git checkout -b tmp-web-pages
 	git add -f html
 	git commit -n -sm "auto-generated web-pages" html
-	git subtree push --prefix html origin gh-pages
+	#git subtree push --prefix html origin gh-pages
+	git push origin `git subtree split --prefix html gh-pages`:gh-pages --force
 	git checkout master
 	git branch -D tmp-web-pages
 
-.PHONY: html specs
+.PHONY: specs .p11-kit.stamp-tmp

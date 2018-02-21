@@ -1,0 +1,4 @@
+[submodule "p11-kit-copy"]
+	path = p11-kit-copy
+	url = https://github.com/p11-glue/p11-kit.git
+	branch = master
