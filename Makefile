@@ -1,11 +1,14 @@
 
-all: specs .html.stamp
+all: specs .html.stamp-check .html.stamp
 
 clean:
-	rm -rf html/*
+	rm -f .html.stamp .p11-kit.stamp
 
 specs:
 	make -C specs all
+
+.html.stamp-check:
+	test -d html || rm -f .html.stamp
 
 .p11-kit.stamp-tmp:
 	git submodule update --init
@@ -32,8 +35,8 @@ upload: .html.stamp
 	git add -f html
 	git commit -n -sm "auto-generated web-pages" html
 	#git subtree push --prefix html origin gh-pages
-	git push origin `git subtree split --prefix html gh-pages`:gh-pages --force
+	git push origin `git subtree split --prefix html tmp-web-pages`:gh-pages --force
 	git checkout master
 	git branch -D tmp-web-pages
 
-.PHONY: specs .p11-kit.stamp-tmp
+.PHONY: .html.stamp-check specs .p11-kit.stamp-tmp
