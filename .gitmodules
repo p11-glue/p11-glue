@@ -2,3 +2,6 @@
 	path = p11-kit-copy
 	url = https://github.com/p11-glue/p11-kit.git
 	branch = master
+[submodule "pkcs11-trust-assertions-copy"]
+	path = pkcs11-trust-assertions-copy
+	url = https://github.com/p11-glue/pkcs11-trust-assertions.git

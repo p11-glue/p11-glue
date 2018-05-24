@@ -225,7 +225,7 @@ CertAux ::= SEQUENCE {
 
 		<para>Trust Assertions are the author's previous attempt to solve the problem of sharing
 			trust policy information. Details about this are available online
-				<footnote><para><ulink url="http://p11-glue.freedesktop.org/doc/pkcs11-trust-assertions/">Storing Trust Assertions in PKCS#11 Modules</ulink></para></footnote>.</para>
+				<footnote><para><ulink url="../pkcs11-trust-assertions/">Storing Trust Assertions in PKCS#11 Modules</ulink></para></footnote>.</para>
 
 		<sect2 id="trust-assertion-problems">
 			<title>Deficiencies</title>

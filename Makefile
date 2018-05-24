@@ -26,6 +26,10 @@ specs:
 	ln -t html -s p11-kit/manual manual || true
 	test -d html/doc || mkdir html/doc
 	rsync -Hvax specs/storing-trust/ html/doc/storing-trust-policy
+	cd pkcs11-trust-assertions-copy && make -j8 && cd ..
+	mkdir -p html/doc/pkcs11-trust-assertions
+	cp pkcs11-trust-assertions-copy/trust-assertions.html html/doc/pkcs11-trust-assertions/index.html
+	cp pkcs11-trust-assertions-copy/pkcs11-trust-assertions.h html/doc/pkcs11-trust-assertions
 	touch $@
 
 upload: .html.stamp
