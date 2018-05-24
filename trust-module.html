@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="style.css" rel="stylesheet" type="text/css" media="screen" /><title>Trust Storage Module</title>
+</head>
+<body>
+<div id="header-wrapper">
+	<div id="header">
+		<div id="menu">
+			<ul>
+				<li><a href="http://www.freedesktop.org/" class="first">FreeDesktop.org</a></li>
+				<li><a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">Mailing List</a></li>
+				<li><a href="/p11-glue">About</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<!-- end #header -->
+<!-- end #header-wrapper -->
+<div id="logo">
+	<h1><a href="/p11-glue">p11-glue</a></h1>
+	<p><em>using PKCS#11 to unite crypto libraries</em></p>
+</div>
+<hr />
+<!-- end #logo -->
+<div id="page"><div id="page-bgtop">
+
+	<div id="sidebar">
+	
+	
+	</div>
+
+	<div id="content">
+	
+<h1>Project: Trust Storage Module</h1>
+
+<p>This is a PKCS#11 module that exposes read-only storage of system
+certificates and trust policy. It loads the certificates and trust
+storage from a directory of files.</p>
+
+<p>Crypto libraries are able to use this as a shared source of certificate
+authority anchors, black lists, and other locally stored system trust policy.</p>
+
+<p>There is work going on to define a comprehensive representation of
+this <a href="sharing-trust-policy.html">shared trust policy</a>. Once such a
+solution matures we hope to implement it in this PKCS#11 trust storage module.</p>
+
+<p>Also included is a tool called <tt>p11-kit extract-trust</tt> that can be used
+to extract certificates anchors with trust information in various formats for
+crypto libraries not (or not yet) able to read from this PKCS#11 trust module
+directly.</p>
+
+<p>A goal is to have minimal dependencies, and be crypto library agnostic so this
+can be used by any library or app. Accesses information owned by root and configured
+by a system administrator or distro creator. These PKCS#11 objects are read-only
+and so don't need to go through a coordinating daemon. Thus we can implement an
+efficient, reliable lookup for these system certs and other objects, with less
+moving parts.</p>
+
+<h2>Source Repository</h2>
+
+<p>Code has been merged into the main p11-kit repository, and is found in
+the <tt>trust/</tt> subdirectory. The extract code is found in the <tt>tools</tt>
+subdirectory:</p>
+
+<pre>
+$ git clone https://github.com/p11-glue/p11-kit
+$ cd p11-kit
+</pre>
+
+<h2>Status</h2>
+
+<p>An implementation of the module is available, and you can try it out. A dependency
+on libtasn1-devel is required to build the PKCS#11 trust module. The extract
+tool is also implemented.</p>
+
+<pre>
+$ sh autogen.sh --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib64 --enable-debug \
+	--with-trust-paths=/etc/pki/ca-trust/source:/usr/share/pki/ca-trust-source
+$ make
+$ sudo make install
+$ sudo mv -v /usr/lib64/libnssckbi.so /opt/libnssckbi.so.orig-nss
+$ sudo ln -sv pkcs11/p11-kit-trust.so /usr/lib64/libnssckbi.so
+</pre>
+
+<p>Now place some certificates in the <tt>--with-trust-paths</tt> location(s).
+Right now, as input, you can use DER, PEM or OpenSSL style 'trusted
+certificates'.</p>
+
+<p>For example you can tweak some trust policy bits like so:</p>
+
+<pre>
+$ openssl x509 -addtrust serverAuth -addreject clientAuth \
+	-in /path/to/my-ca.pem -out /etc/pki/ca-trust/source/anchors/my-ca.pem
+</pre>
+
+<p>Now you can run apps like Firefox and see the certificates appear in the
+Certificate manager and are trusted as appropriate. You can use a command like
+this to see some debug output:</p>
+
+<pre>
+$ P11_KIT_DEBUG=all firefox
+</pre>
+
+<p>Run the extraction tool, and/or customize it:</p>
+
+<pre>
+$ p11-kit extract-trust
+</pre>
+
+<h2>Documentation</h2>
+
+<ul>
+	<li><a href="https://p11-glue.github.io/p11-glue/trust.html">Trust policy module documentation</a></li>
+	<li><a href="https://p11-glue.github.io/p11-glue/p11-kit.html">Extract tool documentation</a></li>
+</ul>
+
+<h2>Contributing</h2>
+
+<ul>
+	<li>Mailing list:
+		<a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</a></li>
+	<li>Bugs:
+		<a href="https://github.com/p11-glue/p11-kit/issues">github issue tracker</a></li>
+</ul>
+
+
+	</div>
+
+</div>
+
+	<!-- end #page -->
+	<div id="footer">
+		<p>Design by <a href="http://www.freecsstemplates.org/">Free CSS Templates</a>.</p>
+	</div>
+	<!-- end #footer -->
+</div>
+</body>
+</html>

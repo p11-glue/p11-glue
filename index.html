@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="style.css" rel="stylesheet" type="text/css" media="screen" /><title>p11 glue</title>
+</head>
+<body>
+<div id="header-wrapper">
+	<div id="header">
+		<div id="menu">
+			<ul>
+				<li><a href="http://www.freedesktop.org/" class="first">FreeDesktop.org</a></li>
+				<li><a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">Mailing List</a></li>
+				<li><a href="/p11-glue">About</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<!-- end #header -->
+<!-- end #header-wrapper -->
+<div id="logo">
+	<h1><a href="/p11-glue">p11-glue</a></h1>
+	<p><em>using PKCS#11 to unite crypto libraries</em></p>
+</div>
+<hr />
+<!-- end #logo -->
+<div id="page"><div id="page-bgtop">
+
+	<div id="sidebar">
+	
+<ul>
+	<li>
+		<h2><a href="p11-kit.html">Project: p11-kit</a></h2>
+		<p><a href="p11-kit.html">p11-kit</a> provides a way to load and
+		enumerate PKCS#11 modules. Implements a standard discoverable
+		configuration for installed PKCS#11 modules.</p>
+	</li>
+	<li>
+		<h2><a href="sharing-trust-policy.html">Spec: Sharing Trust Policy</a></h2>
+		<p>Sharing <a href="sharing-trust-policy.html">trust policy</a>
+		allows multiple crypto libraries to make coherent decsions.
+		Attached certificate extensions are a part of this.</p>
+	</li>
+	<li>
+		<h2><a href="pkcs11-uris.html">Spec: PKCS#11 URIs</a></h2>
+		<p><a href="pkcs11-uris.html">PKCS#11 URIs</a> are a way to
+		identify a certain crypto object that resides in a PKCS#11
+		module.</p>
+	</li>
+	<li>
+		<h2><a href="trust-module.html">Project: Trust Module</a></h2>
+		<p>The <a href="trust-module.html">PKCS#11 Trust Module</a> 
+		provides access to system certificates and trust policy.</p>
+	</li>
+	<li>
+		<h2><a href="revocation-cache.html">Project: Revocation Cache</a></h2>
+		<p><a href="revocation-cache.html">PKCS#11 Revocation Cache</a> 
+		provides a common cache of OSCP responses and CRLs and a daemon to update them.</p>
+	</li>
+</ul>
+
+	</div>
+
+	<div id="content">
+	
+<h1>Introduction</h1>
+<p>This is an effort to use and promote <a href="http://www.rsa.com/rsalabs/node.asp?id=2133">PKCS#11</a>
+as glue between crypto libraries and security applications on the open source
+desktop.</p>
+
+<p><img src="images/p11-glue.jpg"></p>
+
+<p>On the desktop today we have a variety of technically excelent crypto
+libraries (such as NSS, GnuTLS, OpenSSL etc.) The diversity allows each to
+excel and progress in its area of focus. Applications choose to use different
+crypto libraries for all sorts of good reasons.</p>
+
+<p>Users suffer because the desktop lacks a consistent way to use certificates
+or keys with all the various applications. For example different applications
+look for their trust anchor certificates in different places, and configuring
+each application with a client certificate is a laborious task.</p>
+
+<p>Developers suffer because when an application needs to use security
+(like TLS), the application needs to provide support for all sorts of
+security configuration, cetrificate/key file locations, security exceptions,
+smart cards, and so on. And so progress suffers because there's no foundation
+for consistent place to store security stuff on the desktop.</p>
+
+<p><a href="http://www.rsa.com/rsalabs/node.asp?id=2133">PKCS#11 is a standard</a>
+for accessing crypto objects like keys and certificates and performing cryptographic
+operations on them. It's often used together with smart cards.</p>
+
+<p>By using PKCS#11 to provide a plugable way for crypto libraries and other
+software to access keys, certificate, and things like trust anchors, we can
+solve the above problems.</p>
+
+<p>We can use PKCS#11 to make apps more secure (through the support use of
+smart cards), more usable (through common storage), and easier to develop
+(through standard ways to store and access crypto objects).</p>
+
+<ul>
+	<li><a href="http://www.rsa.com/rsalabs/node.asp?id=2133">The PKCS#11 Specification</a></li>
+	<li><a href="pkcs11-support.html">Application and Library support for PKCS#11</a></li>
+</ul>
+
+<br class="clear">
+
+	</div>
+
+</div>
+
+	<!-- end #page -->
+	<div id="footer">
+		<p>Design by <a href="http://www.freecsstemplates.org/">Free CSS Templates</a>.</p>
+	</div>
+	<!-- end #footer -->
+</div>
+</body>
+</html>

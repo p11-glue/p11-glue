@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="style.css" rel="stylesheet" type="text/css" media="screen" /><title>PKCS#11 URIs</title>
+</head>
+<body>
+<div id="header-wrapper">
+	<div id="header">
+		<div id="menu">
+			<ul>
+				<li><a href="http://www.freedesktop.org/" class="first">FreeDesktop.org</a></li>
+				<li><a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">Mailing List</a></li>
+				<li><a href="/p11-glue">About</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<!-- end #header -->
+<!-- end #header-wrapper -->
+<div id="logo">
+	<h1><a href="/p11-glue">p11-glue</a></h1>
+	<p><em>using PKCS#11 to unite crypto libraries</em></p>
+</div>
+<hr />
+<!-- end #logo -->
+<div id="page"><div id="page-bgtop">
+
+	<div id="sidebar">
+	
+	
+	</div>
+
+	<div id="content">
+	
+<h1>Spec: PKCS#11 URIs</h1>
+
+<p>PKCS#11 URIs are a way to identify a certain
+crypto object that resides in a PKCS#11 module. These URIs can be used in
+configuration files, or when one application needs to refer another to a
+cryptographic object, like a key or a certificate.</p>
+
+<p>A PKCS#11 URI looks like:</p>
+
+<pre>
+pkcs11:token=The%20Software%20PKCS#11%20softtoken;object=my-certificate;
+	objecttype=cert;id=%69%95%3e%5c%f4%bd%ec%91
+</pre>
+
+<h2>Implementations and Integration</h2>
+
+<ul>
+	<li><a href="http://www.gnu.org/software/gnutls/">GnuTLS</a>:
+		<a href="http://www.gnu.org/software/gnutls/manual/gnutls.html#PKCS-_002311-tokens">Used to lookup</a>
+		certificate and key objects.
+	<li><a href="http://people.collabora.co.uk/~stefw/gck-docs/">Gck library</a>: API for
+		<a href="http://people.collabora.co.uk/~stefw/gck-docs/gck-PKCS11-URIs.html">parsing and building</a>
+		PKCS#11 URIs</li>
+	<li><a href="p11-kit.html">p11-kit</a>: Used in configuration. Also has 
+		<a href="https://p11-glue.github.io/p11-glue/p11-kit-URIs.html">an API</a> for
+		parsing and building PKCS#11 URIs</li>
+</ul>
+
+<h2>Specification</h2>
+
+<ul>
+	<li>An IETF RFC Draft: <a href="http://tools.ietf.org/html/draft-pechanec-pkcs11uri-03">draft-pechanec-pkcs11uri</a></li>
+	<li>Discussion: <a href="https://www.ietf.org/mailman/listinfo/saag">saag@ietf.org</a></li>
+	<li>Authors: J. Pechanec, D. Moffat</li>
+</ul>
+
+
+	</div>
+
+</div>
+
+	<!-- end #page -->
+	<div id="footer">
+		<p>Design by <a href="http://www.freecsstemplates.org/">Free CSS Templates</a>.</p>
+	</div>
+	<!-- end #footer -->
+</div>
+</body>
+</html>
