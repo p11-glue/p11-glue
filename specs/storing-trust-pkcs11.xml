@@ -219,6 +219,55 @@
 		the <literal>CKA_CLASS</literal> attribute.</para>
 </simplesect>
 
+<simplesect id="pkcs11-whitelist">
+	<title>Set: Whitelist</title>
+
+	<para>We define a new boolean attribute CKA_X_WHITELISTED to indicate
+		whitelist status.</para>
+
+	<para>The following attribute is set on items that are part of the
+		whitelist set:</para>
+
+	<variablelist>
+		<varlistentry>
+			<term><literal>CKA_X_WHITELISTED</literal></term>
+			<listitem><para>Value: <literal>CK_TRUE</literal></para></listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>Items in the whitelist set contain the following fields:</para>
+
+	<variablelist>
+		<varlistentry>
+			<term><literal>CKA_PUBLIC_KEY_INFO</literal></term>
+			<listitem><para>The public key of the anchor. A DER encoded
+			SubjectPublicKeyInfo sequence as defined in X.509. When this
+			value is not present, set to a zero length value.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_ISSUER</literal></term>
+			<listitem><para>The DN of the issuer. Contents as defined in
+			PKCS#11: a DER encoded Name sequence defined in X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_SERIAL_NUMBER</literal></term>
+			<listitem><para>The serial number assigned by the issuer. Contents
+			as defined in PKCS#11: a DER encoded Name sequence defined in
+			X.509.</para></listitem>
+		</varlistentry>
+		<varlistentry>
+			<term><literal>CKA_CLASS</literal></term>
+			<listitem><para>Set to <literal>CKO_CERTIFICATE</literal> when the
+			<literal>CKA_ISSUER</literal> and <literal>CKA_SERIAL_NUMBER</literal> are
+			present. Otherwise may be set to either <literal>CKO_PUBLIC_KEY</literal>
+			or <literal>CKO_CERTIFICATE</literal> as appropriate.</para></listitem>
+		</varlistentry>
+	</variablelist>
+
+	<para>Other standard PKCS#11 fields should be present on the objects as per
+		the <literal>CKA_CLASS</literal> attribute.</para>
+</simplesect>
+
 <simplesect>
 	<title>Set: Attached Extensions</title>
 
@@ -274,6 +323,7 @@
 <![CDATA[
 #define CKO_X_CERTIFICATE_EXTENSION   0xd84447c8UL
 #define CKA_X_DISTRUSTED              0xd8444764UL
+#define CKA_X_WHITELISTED             0xd8444765UL
 
 /* The following definition comes from PKCS#11 2.40
 #define CKA_PUBLIC_KEY_INFO           0x00000129UL

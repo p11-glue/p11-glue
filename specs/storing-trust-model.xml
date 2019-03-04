@@ -47,8 +47,8 @@
 			not represented. Instead this is a common base of information to share, which
 			augmented by other application specific information.</para>
 
-		<para>This document currently limits itself to treatment of anchors and blacklisted
-			certificates. Later companion documents will deal with pinned keys and shared
+		<para>This document currently limits itself to treatment of anchors, blacklisted
+			certificates, and optional whitelisted certificates. Later companion documents will deal with shared
 			state/storage needed by alternative trust validation implementations.</para>
 	</sect2>
 </sect1>
@@ -173,6 +173,26 @@
 		such as OCSP and OCSP Stapling.</para>
 
 	<para>On Linux there has been no standard way to represent blacklists. Various
+		crypto libraries have various means of representing them, and
+		<link linkend="storing-trust-existing">we examine them elsewhere</link>.
+		This document wishes to define a such a standard.</para>
+</sect2>
+
+<sect2 id="concept-whitelist">
+	<title>About Whitelisting and Certificate Pinning</title>
+
+	<para>A whitelisted key or certificate is one that should be accepted outright
+		when it is encountered in a validation algorithm.</para>
+
+	<para>When dealing with locally installed anchors, it is often required that
+		an end entity certificate needs to be explicitly trusted for a given
+		purpose or policy. The concept of whitelists complements anchors to
+		support such use-cases.</para>
+
+	<para>Whitelists always have precedence over blacklists and distributed by system
+		administrators or local users.</para>
+
+	<para>On Linux there has been no standard way to represent whitelists. Various
 		crypto libraries have various means of representing them, and
 		<link linkend="storing-trust-existing">we examine them elsewhere</link>.
 		This document wishes to define a such a standard.</para>
