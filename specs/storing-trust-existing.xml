@@ -122,7 +122,7 @@
 		</varlistentry>
 		<varlistentry>
 			<term><literal>CKT_NSS_TRUST_UNKNOWN</literal></term>
-			<listitem><para>This record does not explictily provide trust one
+			<listitem><para>This record does not explicitly provide trust one
 				way or the other. If there is another trust record for this
 				cert in another PKCS #11 module, use it.</para></listitem>
 		</varlistentry>

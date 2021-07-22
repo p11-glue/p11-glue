@@ -14,7 +14,7 @@
 <simplesect id="pkcs11-store">
 	<title>Store representation</title>
 
-	<para>We define a trust store using the stardard PKCS#11 object model, with a few
+	<para>We define a trust store using the standard PKCS#11 object model, with a few
 		new attributes.</para>
 
 	<variablelist>
@@ -87,7 +87,7 @@
 				remove the objects matched by the <literal>C_FindObjects()</literal>
 				function.</para>
 				<para>Another concurrent operation may have also removed an item. Do not
-				propogate <literal>CKR_OBJECT_HANDLE_INVALID</literal> return codes from
+				propagate <literal>CKR_OBJECT_HANDLE_INVALID</literal> return codes from
 				the <literal>C_DestroyObject()</literal> function.</para>
 				<para>Callers may consult the standard PKCS#11 <literal>CK_TOKEN_INFO</literal>
 				<literal>CKF_TOKEN_WRITE_PROTECTED</literal> flag, and object
