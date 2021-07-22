@@ -357,7 +357,7 @@
 		<varlistentry>
 			<term>Issuer: <emphasis>optional, lookup</emphasis></term>
 			<listitem><para>The issuer DN of the authority that issued or
-			previously validated the key or a certificate cotnaining the key.
+			previously validated the key or a certificate containing the key.
 			A DER encoded Name sequence defined in X.509.</para></listitem>
 		</varlistentry>
 		<varlistentry>
