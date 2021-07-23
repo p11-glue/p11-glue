@@ -21,10 +21,11 @@ def main(args):
 	                               undefined=jinja2.StrictUndefined)
 
 	os.chdir(INDIR)
-	os.path.walk(".", process_file, None)
-	print >> sys.stderr, "Results: file://%s/index.html" % OUTDIR
+	for directory, dirnames, filenames in os.walk("."):
+                process_file(directory, filenames)
+	print("Results: file://%s/index.html" % OUTDIR, file=sys.stderr)
 
-def process_file(unused, dirname, names):
+def process_file(dirname, names):
 
 	directory = os.path.normpath(os.path.join(OUTDIR, dirname))
 	if not os.path.exists(directory):
@@ -34,19 +35,16 @@ def process_file(unused, dirname, names):
 
 	for name in names:
 		path = os.path.join(dirname, name)		
-		if os.path.isdir(path):
-			continue
-
-		elif fnmatch.fnmatch(path, "*.tmpl"):
-			print >> sys.stderr, name
+		if fnmatch.fnmatch(path, "*.tmpl"):
+			print(name, file=sys.stderr)
 			output = os.path.join(OUTDIR, path[0:-5])
 			template = jinja_env.get_template(path)
-			data = unicode(template.render(**args)).encode("utf-8")
+			data = str(template.render(**args))
 			if os.path.exists(output):
 				os.unlink(output)
 			with open(output, 'w') as f:
 				f.write(data)
-			os.chmod(output, 0444)
+			os.chmod(output, 0o444)
 
 		elif fnmatch.fnmatch(path, "*.incl"):
 			continue
@@ -56,7 +54,7 @@ def process_file(unused, dirname, names):
 			if os.path.exists(output):
 				os.unlink(output)
 			shutil.copy(path, output)
-			os.chmod(output, 0444)
+			os.chmod(output, 0o444)
 
 
 # For running as a standalone server
