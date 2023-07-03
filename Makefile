@@ -22,6 +22,7 @@ specs:
 	SRCDIR="." python jinja2-build.py
 	cd p11-kit-copy && ./autogen.sh && ./configure --enable-doc && make -j8 && cd ..
 	mkdir -p html/p11-kit
+	cp p11-kit-release-keyring.gpg html/p11-kit
 	rsync -Hvax --exclude doc --exclude build p11-kit-copy/doc/manual/html/ html/p11-kit/manual/
 	ln -t html -s p11-kit/manual manual || true
 	test -d html/doc || mkdir html/doc
