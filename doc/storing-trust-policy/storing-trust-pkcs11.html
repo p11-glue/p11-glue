@@ -1,0 +1,84 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Representation: PKCS#11</title><link rel="stylesheet" type="text/css" href="style.css"><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"><link rel="home" href="index.html" title="Storing Trust Policy"><link rel="up" href="pt01.html" title="Part I. Concrete Representations"><link rel="prev" href="pt01.html" title="Part I. Concrete Representations"><link rel="next" href="storing-trust-c.html" title="Representation: C API"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Representation: PKCS#11</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="pt01.html">Prev</a> </td><th width="60%" align="center">Part I. Concrete Representations</th><td width="20%" align="right"> <a accesskey="n" href="storing-trust-c.html">Next</a></td></tr></table><hr></div><div class="article"><div class="titlepage"><div><div><h2 class="title"><a name="storing-trust-pkcs11"></a>Representation: PKCS#11</h2></div></div><hr></div><p><a class="ulink" href="http://www.cryptsoft.com/pkcs11doc/" target="_top">PKCS#11</a> is a useful
+		and widely supported standard for storage and use of keys and certificates.
+		It is often used with smart cards.</p><p>Here we outline how to use PKCS#11 as a store for trust policy, containing sets
+		for anchors, blacklist, and attached extensions.</p><div class="simplesect"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="pkcs11-store"></a>Store representation</h2></div></div></div><p>We define a trust store using the standard PKCS#11 object model, with a few
+		new attributes.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Store</span></dt><dd><p>Each PKCS#11 token is a store.</p></dd><dt><span class="term">Sets</span></dt><dd><p>Sets are implemented by using certain PKCS#11 attributes to
+				differentiate between items in various sets.</p></dd><dt><span class="term">Items</span></dt><dd><p>Items in the sets are represented by PKCS#11 objects.</p></dd><dt><span class="term">Fields</span></dt><dd><p>Fields are implemented as various PKCS#11 <code class="literal">CK_ATTRIBUTE</code>
+				attributes, and the field identifiers are the <code class="literal">CK_ATTRIBUTE_TYPE</code> type
+				of the attribute.</p><p>Some fields are standard PKCS#11 attributes, and others are
+				implemented by defining a few extension vendor attributes in the PKCS#11
+				defined fashion. To make it clear which attributes are defined here
+				and which are standard, all new attributes and values are
+				prefixed by the letters <code class="literal">_X_</code>. Once standardized
+				they would lose this tag.</p></dd><dt><span class="term">Lookup fields</span></dt><dd><p>In PKCS#11 any field can be used as a lookup field. For speedy
+				lookups it is recommended that implementations internally index the
+				attributes that will be used to lookup trust policy.</p></dd><dt><span class="term">Optional fields</span></dt><dd><p>Optional fields are implemented as an empty zero-length
+				<code class="literal">CK</code> value when the field is not present.</p></dd><dt><span class="term">Lookup operation</span></dt><dd><p>A lookup operation is implemented using the 
+				<code class="literal">C_FindObjectsInit()</code>  <code class="literal">C_FindObjects()</code>
+				PKCS#11 functions.</p><p>The set to lookup is specified by passing certain set specific
+				attributes, defined below, as part of the <code class="literal">C_FindObjectsInit()</code>
+				find template.</p><p>The fields to lookup are also passed as part of the 
+				<code class="literal">C_FindObjectsInit()</code> find template.</p><p>If there are fields for which values need to be retrieved, the
+				<code class="literal">C_GetAttributeValue()</code> function should be used to retrieve
+				them on each of the objects matched by <code class="literal">C_FindObjects()</code>.</p></dd><dt><span class="term">Remove operation</span></dt><dd><p>A remove operation is implemented using the 
+				<code class="literal">C_FindObjectsInit()</code>  <code class="literal">C_FindObjects()</code>
+				PKCS#11 functions, in the same way as a in the lookup operation described
+				above.</p><p>The <code class="literal">C_DestroyObject()</code> function should be used to
+				remove the objects matched by the <code class="literal">C_FindObjects()</code>
+				function.</p><p>Another concurrent operation may have also removed an item. Do not
+				propagate <code class="literal">CKR_OBJECT_HANDLE_INVALID</code> return codes from
+				the <code class="literal">C_DestroyObject()</code> function.</p><p>Callers may consult the standard PKCS#11 <code class="literal">CK_TOKEN_INFO</code>
+				<code class="literal">CKF_TOKEN_WRITE_PROTECTED</code> flag, and object
+				<code class="literal">CKA_MODIFIABLE</code> attribute to determine whether items
+				may be removed.</p></dd><dt><span class="term">Store operation</span></dt><dd><p>A store operation is implemented using the <code class="literal">C_CreateObject()</code>
+				PKCS#11 function.</p><p>The set to store the item in is specified by passing certain
+				set specific attributes, defined below, as part of the
+				<code class="literal">C_CreteObject()</code> attribute template.</p><p>The fields to store are also passed as part of the
+				<code class="literal">C_CreateObject()</code> attribute template.</p><p>Implementors of the <code class="literal">C_CreateObject()</code> function should
+				check for another item that matches the relevant fields for the set in question.
+				If one exists the existing handle should be returned, rather than storing a
+				duplicate object.</p><p>Callers may consult the standard PKCS#11 <code class="literal">CK_TOKEN_INFO</code>
+				<code class="literal">CKF_TOKEN_WRITE_PROTECTED</code> flag to determine whether items
+				may be stored.</p></dd></dl></div></div><div class="simplesect"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="pkcs11-anchors"></a>Set: Anchors</h2></div></div></div><p>The standard <code class="literal">CKA_TRUSTED</code> boolean attribute is used
+		to define a certificate or public key as an anchor.</p><p>The following attribute is set on items that are part of the
+		set of anchors:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">CKA_TRUSTED</code></span></dt><dd><p>Value: <code class="literal">CK_TRUE</code></p></dd></dl></div><p>Items in the set of anchors contain the following fields:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">CKA_PUBLIC_KEY_INFO</code></span></dt><dd><p>The public key of the anchor, always present. A DER encoded
+			SubjectPublicKeyInfo sequence as defined in X.509.</p></dd><dt><span class="term"><code class="literal">CKA_SUBJECT</code></span></dt><dd><p>The subject DN of the anchor. Contents as defined in
+			PKCS#11: a DER encoded Name sequence defined in X.509.</p></dd><dt><span class="term"><code class="literal">CKA_CLASS</code></span></dt><dd><p>Set to <code class="literal">CKO_CERTIFICATE</code> when the
+			stored item is a certificate, and <code class="literal">CKO_PUBLIC_KEY</code>
+			when it doesn't.</p></dd><dt><span class="term"><code class="literal">CKA_VALUE</code></span></dt><dd><p>When the stored item is a certificate
+			(it has a <code class="literal">CKA_CLASS</code> of <code class="literal">CKO_CERTIFICATE</code>,
+			see above) this attribute stores the DER encoded Certificate
+			sequence defined in X.509.</p></dd></dl></div><p>Other standard PKCS#11 fields should be present on the objects as per
+		the <code class="literal">CKA_CLASS</code> attribute.</p><p>Note that the presence of a BasicConstraints extension marks it as a
+		certificate authority anchor, capable of anchoring a certificate chain,
+		and not just itself.</p></div><div class="simplesect"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="pkcs11-blacklist"></a>Set: Blacklist</h2></div></div></div><p>We define a new boolean attribute CKA_X_DISTRUSTED to indicate
+		blacklist status.</p><p>The following attribute is set on items that are part of the
+		blacklist set:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">CKA_X_DISTRUSTED</code></span></dt><dd><p>Value: <code class="literal">CK_TRUE</code></p></dd></dl></div><p>Items in the blacklist set contain the following fields:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">CKA_PUBLIC_KEY_INFO</code></span></dt><dd><p>The public key of the anchor. A DER encoded
+			SubjectPublicKeyInfo sequence as defined in X.509. When this
+			value is not present, set to a zero length value.</p></dd><dt><span class="term"><code class="literal">CKA_ISSUER</code></span></dt><dd><p>The DN of the issuer. Contents as defined in
+			PKCS#11: a DER encoded Name sequence defined in X.509.</p></dd><dt><span class="term"><code class="literal">CKA_SERIAL_NUMBER</code></span></dt><dd><p>The serial number assigned by the issuer. Contents
+			as defined in PKCS#11: a DER encoded Name sequence defined in
+			X.509.</p></dd><dt><span class="term"><code class="literal">CKA_CLASS</code></span></dt><dd><p>Set to <code class="literal">CKO_CERTIFICATE</code> when the
+			<code class="literal">CKA_ISSUER</code> and <code class="literal">CKA_SERIAL_NUMBER</code> are
+			present. Otherwise may be set to either <code class="literal">CKO_PUBLIC_KEY</code>
+			or <code class="literal">CKO_CERTIFICATE</code> as appropriate.</p></dd></dl></div><p>Other standard PKCS#11 fields should be present on the objects as per
+		the <code class="literal">CKA_CLASS</code> attribute.</p></div><div class="simplesect"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="id1761"></a>Set: Attached Extensions</h2></div></div></div><p>A new object class is defined of type <code class="literal">CKO_X_CERTIFICATE_EXTENSION</code>. Each 
+		object of this class represents one attached certificate extension. It
+		contains the following (standard and newly defined) attributes (in addition
+		to the standard data storage attributes):</p><p>The following attribute is set on items that are part of the
+		set of attached extensions:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">CKA_CLASS</code></span></dt><dd><p>Value: <code class="literal">CKO_X_CERTIFICATE_EXTENSION</code></p></dd></dl></div><p>Items in the set of attached extensions set contain the following fields:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">CKA_PUBLIC_KEY_INFO</code></span></dt><dd><p>The public key associated with the attached
+			extension. A DER encoded SubjectPublicKeyInfo sequence as defined in
+			X.509.</p></dd><dt><span class="term"><code class="literal">CKA_VALUE</code></span></dt><dd><p>The DER encoded value of the Extension sequence as
+				defined in X.509. Note that this is the entire Extension
+				sequence and not just the extnValue field.</p></dd><dt><span class="term"><code class="literal">CKA_OBJECT_ID</code></span></dt><dd><p>The DER-encoded OID of the attached certificate
+			extension. This is the exact contents of the extnID field in the
+			Extension sequence.</p></dd></dl></div><p>In addition the PKCS#11 <span class="emphasis"><em>Common Storage Object Attributes</em></span> may
+	be present, as well as the <code class="literal">CKA_ID</code> attribute.</p></div><div class="simplesect"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="pkcs11-constants"></a>Constants</h2></div></div></div><p>The following constants are defined:</p><pre class="programlisting">
+
+#define CKO_X_CERTIFICATE_EXTENSION   0xd84447c8UL
+#define CKA_X_DISTRUSTED              0xd8444764UL
+
+/* The following definition comes from PKCS#11 2.40
+#define CKA_PUBLIC_KEY_INFO           0x00000129UL
+
+</pre></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="pt01.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="pt01.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="storing-trust-c.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Part I. Concrete Representations </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Representation: C API</td></tr></table></div></body></html>

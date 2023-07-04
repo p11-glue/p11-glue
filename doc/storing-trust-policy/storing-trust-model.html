@@ -1,0 +1,209 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Model: Anchors and Blacklists</title><link rel="stylesheet" type="text/css" href="style.css"><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"><link rel="home" href="index.html" title="Storing Trust Policy"><link rel="up" href="index.html" title="Storing Trust Policy"><link rel="prev" href="status.html" title="Status of this document"><link rel="next" href="pt01.html" title="Part I. Concrete Representations"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Model: Anchors and Blacklists</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="status.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> <a accesskey="n" href="pt01.html">Next</a></td></tr></table><hr></div><div class="article"><div class="titlepage"><div><div><h1 class="title"><a name="storing-trust-model"></a>Model: Anchors and Blacklists</h1></div></div><hr></div><div class="toc"><dl class="toc"><dt><span class="sect1"><a href="storing-trust-model.html#introduction">1. Introduction</a></span></dt><dt><span class="sect1"><a href="storing-trust-model.html#concepts">2. Concepts</a></span></dt><dt><span class="sect1"><a href="storing-trust-model.html#model">3. Model</a></span></dt></dl></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>1. Introduction</h2></div></div></div><p>Various crypto libraries have various ways to represent and store information
+		about which Certificate Authorities are to be used as trust anchors. They also
+		have different ways to represent certificates that are blacklisted.</p><p>This has led to a poor experience and a lack of coherency on Linux when it
+		comes to validating certificates.</p><p>In this document we examine a general purpose method for storing anchor
+		certificates, and representing policy about them. We also look at blacklists
+		and their peculiarities. We see how we can represent these in a
+		coherent and future-proof manner. In addition to being extensible, the proposed concept
+		is relatively easy to implement and retrofit into existing code.</p><p>By using consistent anchors and other trust information, crypto libraries
+		can make consistent decisions about X.509 certificates.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="id1338"></a>1.1. Scope</h3></div></div></div><p>We are dealing here with the anchors and other trust policy
+			information used by a key or certificate validation algorithm. The algorithm
+			itself lives inside of a crypto library implementation. This trust policy
+			information can be viewed as input to the certificate validation algorithms.
+			We are not dealing with the validation algorithms themselves. These are
+			dealt in sufficient detail in the relevant RFCs 
+			<a href="#ftn.id1339" class="footnote" name="id1339"><sup class="footnote">[1]</sup></a>.
+			While in theory it could be nice to have all implementations share common
+			code for verification of certificates, imagining such an effort is outside
+			the scope of this document. This document does not conflict with such a
+			theoretical effort.</p><p>This document attempts to represent basic local trust policy information for X.509
+			certificate validation. It does not attempt to tackle the theoretical
+			problem of representing all possible forms of digital trust. There are
+			many possible flags, profiles and inputs to certificate validation which are
+			not represented. Instead this is a common base of information to share, which
+			augmented by other application specific information.</p><p>This document currently limits itself to treatment of anchors and blacklisted
+			certificates. Later companion documents will deal with pinned keys and shared
+			state/storage needed by alternative trust validation implementations.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="concepts"></a>2. Concepts</h2></div></div></div><p>Since the words used with these topics are often heavily overloaded and
+		some concepts are discussed here.</p><p>A word on terminology. The word <span class="emphasis"><em>trust</em></span> is used quite a bit
+		in this document. This is a highly overloaded and subjective term, and its use
+		in this specification is unfortunate. An unambiguous term is desirable.
+		The author cringes every time the word <span class="emphasis"><em>trust</em></span> is used.
+		The author cringed a lot while writing this document.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="concept-anchors"></a>2.1. About Anchors</h3></div></div></div><p>X.509 is structured around the concept of having a chain of certificates, each
+		of which is signed and therefore trusted by the previous certificate in the
+		chain: a certificate authority. These chains are built by crypto libraries
+		when validating certificates. They are built in various ways, several of
+		which are outlined in RFC 5280.</p><p>At one end of a certificate chain is the <span class="emphasis"><em>end entity</em></span>
+		certificate, which is the certificate that is being validated. At the other
+		end the certificate chain is anchored by a trust anchor. This is a public
+		key that is explicitly trusted by the local system, either by default or
+		by a deliberate configuration choice. Usually this public key is represented
+		as a certificate. The anchor is usually, but not always, a root self-signed
+		certificate authority.</p><p>Anchors can have <span class="emphasis"><em>trust policy</em></span>
+		<a href="#ftn.id1340" class="footnote" name="id1340"><sup class="footnote">[2]</sup></a>
+		attached to them which define the situations
+		they can be used as anchors. This policy takes on many forms. A given
+		anchor might be only be relevant when verifying an end entity certificate
+		used for email. Another anchor might be relevant only for an end entity
+		certificate that has a Common Name under a certain domain. There are many
+		such policies and combinations of them.</p><p>When the anchor public key is represented by a certificate, this trust policy
+		is often included in the certificate itself. This is done by use of X.509
+		certificate extensions. The email anchor above would have an ExtendedKeyUsage 
+			<a href="#ftn.id1341" class="footnote" name="id1341"><sup class="footnote">[3]</sup></a>
+		certificate extension included in it. The second anchor above would have a
+		NameConstraints
+			<a href="#ftn.id1342" class="footnote" name="id1342"><sup class="footnote">[4]</sup></a>
+		certificate extension included in it.</p><p>But it very often occurs that the trust policy included with the anchor
+		is not present or is not enough. System builders, administrators, and others wish to
+		override or adjust the trust policy for a given certificate authority
+		especially when used as an anchor. This overridden out-of-band trust policy
+		is not included in the anchor itself.</p><p>On Linux there has been no standard way to represent this additional trust
+		policy. Various crypto libraries have various of representing this out-of-band
+		trust policy, <a class="link" href="storing-trust-existing.html" title="Existing Trust Storage Implementations">as examined elsewhere</a>.
+		This document wishes to define such a standard.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="concept-attached"></a>2.2. About Attached Extensions</h3></div></div></div><p>X.509 certificate extensions usually define the ways that a certificate
+		can be used to represent trust policy. Usually these
+		certificate extensions are internal to the certificate, and are signed
+		by the issuer of the certificate.</p><p>By associating additional certificate extensions to a public key or
+		X.509 certificate we can represent out-of-band trust policy, as defined
+		by a system builder, administrator or user.</p><p>We will refer to these additional extensions as <span class="emphasis"><em>Attached
+		Extensions</em></span>.</p><p>When both standard X.509 certificate extensions and attached extensions are
+		present, the attached extension is to be used instead of the certificate
+		extension with the same OID in the certificate itself. In this way attached
+		certificate extensions override policy defined in the certificate, if any.</p><p>This has the implication that if only one portion of a certificate extension
+		needs to be adjusted by a attached certificate extension, that entire
+		extension will be overridden for that certificate. This is intentional. Each extension
+		that contains trust policy should be treated as a whole unit of trust
+		policy. This includes changing the critical field of an extension.
+		This is part of the whole.</p><p>For each certificate, there may not be more than one attached certificate extension of a given
+		identifier or type. There is no way to automatically merge certificate
+		extensions. It may be possible for applications which store attached
+		certificate extensions (such as a management interface) to merge certain
+		extensions in some way. However that is out of the scope of this
+		document.</p><p>Attached certificate extensions are associated with the subject public key info
+		of the anchor or certificate.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="concept-blacklist"></a>2.3. About Blacklisting and Revocation</h3></div></div></div><p>A blacklisted key or certificate is one that should be rejected outright
+		when it is encountered in a validation algorithm.</p><p>As designed, when an X.509 certificate is compromised, either through malice
+		or accident, it is supposed to be revoked. Verification algorithms check against
+		lists of revoked certificates published by certificate authorities in
+		standard ways.</p><p>When an anchor certificate is revoked, or revocation needs to take place
+		independent of the certificate authority, such a certificate is added to
+		a blacklist. This is a separate mechanism from the certificate revocation
+		lists outlined in X.509.</p><p>Blacklists are distributed by system builders or administrators. They are
+		used as a supplement to retrieved revocation lists, and dynamic protocols
+		such as OCSP and OCSP Stapling.</p><p>On Linux there has been no standard way to represent blacklists. Various
+		crypto libraries have various means of representing them, and
+		<a class="link" href="storing-trust-existing.html" title="Existing Trust Storage Implementations">we examine them elsewhere</a>.
+		This document wishes to define a such a standard.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="model"></a>3. Model</h2></div></div></div><p>Over the years there have been many ways that anchors and
+		blacklists have been represented. It is clear that none of the
+		<a class="link" href="storing-trust-existing.html" title="Existing Trust Storage Implementations">examined representations</a>
+		serve to comprehensively model the necessary trust information.</p><p>Here we discuss a stored model which can be used to store,
+		lookup, and share (between implementations) anchors and blacklists.
+		The model is generic in nature and defines the characteristics
+		that actual APIs and formats should have.</p><p>Actual APIs for accessing this model are defined in companion
+		documents.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="model-store"></a>3.1. The Store</h3></div></div></div><p>In its general form the store has the following characteristics. It is
+		a subset of the behavior and characteritsics used by many other
+		object stores or relational models.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Sets</span></dt><dd><p>The store contains various data <span class="emphasis"><em>sets</em></span>
+				used for various various purposes.</p></dd><dt><span class="term">Items</span></dt><dd><p>Each set contains multiple items.</p></dd><dt><span class="term">Fields</span></dt><dd><p>Each item has fields. Fields have an identifier,
+				and contain byte data as their value.</p></dd><dt><span class="term">Lookup fields</span></dt><dd><p>Certain fields are used to lookup items in a
+				set. These lookup fields are not necessarily unique among
+				all items in a set. Multiple items may match a given lookup
+				field value.</p></dd><dt><span class="term">Optional fields</span></dt><dd><p>Certain fields are optional, and may be missing
+				from an item.</p></dd><dt><span class="term">Lookup operation</span></dt><dd><p>A lookup operation takes as input: the set, the lookup
+				fields/values, and the identifiers of the fields to return.</p><p>The returned values and fields are returned for all
+				items matching the lookup fields.</p><p>No particular order is defined for the returned items.</p><p>It is possible to do a lookup without specifying any
+				fields to return, merely to check if matching items are in the set.</p><p>It is not an error for a lookup operation to return no items.</p></dd><dt><span class="term">Remove operation</span></dt><dd><p>A remove operation takes as input: the set, and the lookup
+				fields/values.</p><p>All items matching the input are removed from the set.</p><p>The remove operation is not supported by read-only sets.</p><p>It is not an error for a remove operation to remove no items.</p></dd><dt><span class="term">Store operation</span></dt><dd><p>A store operation takes as input: the set, and the
+				fields/values to store.</p><p>If an item matching all the fields/values already exists
+				in the set, then the item is not added, although this is not an
+				error.</p><p>The store operation is not supported by read-only sets.</p></dd></dl></div><p>Implementations of the store may have additional capabilities, but must implement
+	the above characteristics and behavior.</p></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="model-anchors"></a>3.2. Set: Anchors</h3></div></div></div><p>This is a known set containing anchors to be used in certificate
+	chain validation. The presence of a public key in this data set makes
+	it an anchor.</p><p>Items in the set of anchors contain the following fields:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Public Key Info: <span class="emphasis"><em>required, lookup</em></span></span></dt><dd><p>The public key of the anchor. A DER encoded
+			SubjectPublicKeyInfo sequence as defined in X.509.</p></dd><dt><span class="term">Subject: <span class="emphasis"><em>optional, lookup</em></span></span></dt><dd><p>The subject DN of the anchor. A DER encoded
+			Name sequence defined in X.509.</p></dd><dt><span class="term">Certificate: <span class="emphasis"><em>optional</em></span></span></dt><dd><p>A certificate associated with the anchor. The
+			DER encoded Certificate sequence defined in X.509.</p></dd></dl></div><p>Given the above fields and their flags, this set has the following
+	characteristics:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Anchors are defined as a public key.</p></li><li class="listitem"><p>Some, but not all anchors have an associated certificate.</p></li><li class="listitem"><p>Some, but not all anchors have an associated subject.</p></li><li class="listitem"><p>A single anchor public key can be stored multiple times
+			with different subjects and certificates.</p></li></ul></div><p>Implementation notes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>To determine whether a given public key is an anchor
+			callers should perform a lookup operation on this set using the
+			public key info as the lookup field.</p></li><li class="listitem"><p>To determine whether a given certificate is an anchor
+			callers should extract the subjectPublicKeyInfo field of that
+			certificate. Then perform a lookup operation on this set using
+			the public key info as the lookup field.</p></li><li class="listitem"><p>If a caller is building a certificate chain, and wishes
+			to find a possible anchor: Perform a lookup operation on this set
+			using the issuer field of the last certificate in
+			the chain as the subject lookup field.</p></li><li class="listitem"><p>Callers looking up anchors in the store which are
+			unable to handle anchors that are not certificates, should
+			ignore anchors that do not contain certificates. If multiple
+			results are returned for a lookup, such callers should prefer
+			the result which contains a certificate field.</p></li><li class="listitem"><p>Anchors without a subject field are not able to be
+			used when building a certificate chain.</p></li><li class="listitem"><p>To change whether a public key or certificate is an anchor
+			or not, it is added or removed from the list of anchors.</p></li><li class="listitem"><p>Callers storing anchors in the store, should be aware
+			that certificate and subject fields are desired by many callers,
+			and should store those fields with the anchor if possible.</p></li><li class="listitem"><p>In order to be a certificate authority anchor (that is an
+			anchor in a certificate chain with a length longer than one)
+			the BasicConstraints extension must be present with a isCa
+			field set to TRUE. This extension can be present either in
+			the certificate or attached to it.</p></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="model-blacklist"></a>3.3. Set: Blacklist</h3></div></div></div><p>This is a known set containing public keys that should never be
+	treated as valid. Items in the blacklist set contain the following fields:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Public Key Info: <span class="emphasis"><em>optional, lookup</em></span></span></dt><dd><p>The public key that is blacklisted. A DER encoded
+			SubjectPublicKeyInfo sequence as defined in X.509.</p></dd><dt><span class="term">Issuer: <span class="emphasis"><em>optional, lookup</em></span></span></dt><dd><p>The issuer DN of the authority that issued or
+			previously validated the key or a certificate containing the key.
+			A DER encoded Name sequence defined in X.509.</p></dd><dt><span class="term">Serial Number: <span class="emphasis"><em>optional, lookup</em></span></span></dt><dd><p>The serial number given by the authority issued or
+			previously validated the key or a certificate containing the key.
+			The DER encoded CertificateSerialNumber field defined in X.509.</p></dd></dl></div><p>Given the above fields and their flags, this set has the following
+	characteristics:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Keys may be black listed by their public key.</p></li><li class="listitem"><p>Certificates may be black listed by issuer and serial number.</p></li><li class="listitem"><p>A single public key may be blacklisted with different issuer
+			and serial number fields.</p></li></ul></div><p>Implementation notes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>To determine whether a given public key is black listed
+			callers should perform a lookup operation on this set using the
+			public key info as the lookup field.</p></li><li class="listitem"><p>Callers which are validating certificate chains should,
+			for all non-root certificates in the chain, perform a lookup
+			on this set using the issuer and serialNumber as lookup
+			fields.</p></li><li class="listitem"><p>Callers storing blacklists in the store, should store
+			as much information as is available. If a certificate is available
+			then store all three of the public key info, issuer, and serial number
+			fields. If only issuer and serial number information is available
+			(such as would come from a CRL list) then store those.</p></li><li class="listitem"><p>Additionally it is possible to blacklist a certificate by
+			constraining its trust policy with certificate extensions like
+			ExtendedKeyUsage so that it will not validate for any purpose
+			or use case. This is not the recommended approach. Implementors
+			should instead place the certificates on an explicit
+			blacklist.</p></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="model-attached"></a>3.4. Set: Attached Extensions</h3></div></div></div><p>This is a known set of certificate extensions that should be applied
+	to a public key, which define or adjust trust policy for it. Items in the
+	attached extensions set contain the following fields:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Public Key Info: <span class="emphasis"><em>required, lookup</em></span></span></dt><dd><p>The public key with which the extension is to
+			be used. A DER encoded SubjectPublicKeyInfo sequence as defined
+			in X.509.</p></dd><dt><span class="term">Extension: <span class="emphasis"><em>required</em></span></span></dt><dd><p>The extension to define for the public key.
+			A DER encoded Extension sequence defined in X.509.</p></dd></dl></div><p>Given the above fields and their flags, this set has the following
+	characteristics:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Attached extensions are associated with a public key.</p></li><li class="listitem"><p>Multiple attached extensions may be present for a given public key.</p></li></ul></div><p>Implementation notes:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>To lookup all attached extensions for a given certificate
+			or public key, callers should perform a lookup operation on this
+			set using the public key info as the lookup field.</p></li><li class="listitem"><p>Callers which are validating certificate chains should,
+			retrieve all attached extensions for each certificate in the chain
+			and use those attached extensions as if they had been present in
+			the respective certificate. If an attached extension has the same
+			extnID value as one present in the certificate, the attached
+			certificate extension should be used instead.</p></li><li class="listitem"><p>Callers storing attached extensions in the store, should never
+			store duplicate extensions in the set that contain the same extnID
+			value, just as you would not place multiple extensions in a certificate
+			with the same extnID.</p></li><li class="listitem"><p>To change whether a certificate is an authority or not, an
+			attached BasicConstraints extension is added with the relevant
+			isCa and pathlen fields.</p></li><li class="listitem"><p>An ExtendedKeyUsage or KeyUsage attached extension may
+			be added to a certificate when the system builder or administrator
+			wishes to define or override which purposes a certificate can be
+			used for (eg: server authentication, email, etc.)</p></li><li class="listitem"><p>In combination with having a certificate an anchor, these
+			attached extensions may be used to constrain for what purposes
+			anchors can be used.</p></li><li class="listitem"><p>A NameConstraints attached certificate extension may be
+			added to a certificate when the system builder or administrator
+			wishes to define which end entity names can be signed by a
+			given certificate.</p></li></ul></div></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="model-layering"></a>3.5. Store Layering</h3></div></div></div><p>Implementations may have multiple stores, each containing the above sets.
+	For example one store may be a read-only system store, and another store may
+	be one editable by the user. Implementations should have a defined order of
+	lookup priority for these multiple stores.</p><p>Callers performing a lookup operation should perform the lookup against
+	each store in turn, using the defined order. Once the lookup operation returns
+	results against a store, it should not continue to on to lower priority stores.
+	In this way items in higher priority stores override information in lower
+	priority stores.</p><p>If a public key or certificate is both in the set of anchors and the
+	blacklist set, then the caller should treat it as black listed. This means that both
+	the anchors and blacklist sets in a given store should be consulted when
+	validating certificates or keys. However again, as noted above, once a store
+	returns results for a key, stores with a lower priority should not be consulted
+	for trust information about that key.</p></div></div><div class="footnotes"><br><hr style="width:100; text-align:left;margin-left: 0"><div id="ftn.id1339" class="footnote"><p><a href="#id1339" class="para"><sup class="para">[1] </sup></a>Certificate verification is dealt with in detail
+			in <a class="ulink" href="http://www.ietf.org/rfc/rfc5280.txt" target="_top">RFC 5280</a>.
+			</p></div><div id="ftn.id1340" class="footnote"><p><a href="#id1340" class="para"><sup class="para">[2] </sup></a>Note we use the term <span class="emphasis"><em>policy</em></span> here rather
+			broadly, and is not limited to the PolicyConstraints certificate
+			extension. Rather it includes such concepts as ExtendedKeyUsage,
+			NameConstraints, PolicyConstraints, and so on.</p></div><div id="ftn.id1341" class="footnote"><p><a href="#id1341" class="para"><sup class="para">[3] </sup></a>See RFC 5280 section 4.2.1.12</p></div><div id="ftn.id1342" class="footnote"><p><a href="#id1342" class="para"><sup class="para">[4] </sup></a>See RFC 5280 section 4.2.1.10</p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="status.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> <a accesskey="n" href="pt01.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Status of this document </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Part I. Concrete Representations</td></tr></table></div></body></html>

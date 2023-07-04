@@ -1,0 +1,192 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Storing Trust Assertions in PKCS#11 Modules</title><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article"><div class="titlepage"><div><div><h2 class="title"><a name="id1337"></a>Storing Trust Assertions in PKCS#11 Modules</h2></div><div><div class="authorgroup"><div class="author"><h3 class="author"><span class="firstname">Stef</span> <span class="surname">Walter</span></h3><div class="affiliation"><span class="orgname">Collabora Ltd<br></span><div class="address"><p><br>
+						<code class="email">&lt;<a class="email" href="mailto:stefw@collabora.co.uk">stefw@collabora.co.uk</a>&gt;</code><br>
+					</p></div></div></div></div></div><div><p class="releaseinfo">Rough "rougher than burlap underwear" draft</p></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl class="toc"><dt><span class="section"><a href="#introduction">Introduction</a></span></dt><dt><span class="section"><a href="#trust-assertions">Trust Assertions</a></span></dt><dd><dl><dt><span class="section"><a href="#trust-level">Level of Trust</a></span></dt><dt><span class="section"><a href="#trust-purpose">Purpose</a></span></dt><dt><span class="section"><a href="#trust-subject">Subject Reference</a></span></dt></dl></dd><dt><span class="section"><a href="#pkcs11-objects">PKCS#11 Trust Assertion Objects</a></span></dt><dd><dl><dt><span class="section"><a href="#common-attributes">Common Trust Assertion Object Attributes</a></span></dt><dt><span class="section"><a href="#anchored-attributes">Anchored Certificate Assertion</a></span></dt><dt><span class="section"><a href="#pinned-attributes">Pinned Certificate Assertion</a></span></dt><dt><span class="section"><a href="#distrusted-attributes">Distrusted Certificate Assertion</a></span></dt></dl></dd><dt><span class="section"><a href="#operations">Operations</a></span></dt><dd><dl><dt><span class="section"><a href="#operation-build-chain">Building a Certificate Chain</a></span></dt></dl></dd><dt><span class="section"><a href="#justifications">Justifications</a></span></dt><dd><dl><dt><span class="section"><a href="#justification-why-no-hash">Why use a complete certificate DER encoding for positive trust assertions?</a></span></dt><dt><span class="section"><a href="#justification-why-issuer-serial">Why refer to certificates in negative trust assertions by issuer and serial number?</a></span></dt><dt><span class="section"><a href="#justification-why-not-nss">Why not use NSS Trust Objects?</a></span></dt><dt><span class="section"><a href="#justification-why-not-uris">Why not use PKCS#11 URIs?</a></span></dt><dt><span class="section"><a href="#justification-why-cka-trusted">How is this related to CKA_TRUSTED?</a></span></dt></dl></dd></dl></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>Introduction</h2></div></div></div><p>Trust assertions are represent bits of trust information used by an
+			application to make trust decisions. For example, trust assertions can
+			represent certificate authority anchors, pinned certificate exceptions, or
+			revocation lists. Trust assertions do not represent the trust decision
+			itself. They are merely one factor in the trust decision. However by using
+			trust assertions applications (and libraries) can make consistent trust
+			decisions and interoperate with one another. This is a building block
+			toward a usable crypto experience for the user of such applications.</p><p><a class="ulink" href="http://www.cryptsoft.com/pkcs11doc/" target="_top">PKCS#11</a> is a useful
+			and widely supported standard for storage and use of keys and certificates.
+			It is often used with smart cards.</p><p>This specification outlines how to store and lookup trust assertions via the
+			PKCS#11 API. We detail an extension which accomplishes this.</p><p>A word on terminology. We use the word <span class="emphasis"><em>trust</em></span> quite a bit
+			in this document. This is a highly overloaded and subjective term, and its use
+			in this specification is unfortunate. An unambiguous term is desirable.
+			The author cringes every time the word <span class="emphasis"><em>trust</em></span> is used.
+			The author cringes a lot.</p><p>In this specification we deal only with trust assertions related to certificates.
+			In theory, trust assertions can relate to secret keys, and other subjects
+			as well. Future versions of this specification may specify trust assertions
+			for these other subjects.</p></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="trust-assertions"></a>Trust Assertions</h2></div></div></div><p>A trust assertion is a generic concept. Each trust assertion describes a level
+			of trust in a certain subject for a given purpose. Conceptually each trust
+			assertion is a triple containing the following:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><a class="link" href="#trust-subject" title="Subject Reference">Reference to the subject</a></p></li><li class="listitem"><p><a class="link" href="#trust-purpose" title="Purpose">Purpose</a></p></li><li class="listitem"><p><a class="link" href="#trust-level" title="Level of Trust">Level of trust</a></p></li></ul></div><p>We examine each of these parts of the triple in further detail below.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="trust-level"></a>Level of Trust</h3></div></div></div><p>This describes the level of trust represented by the trust assertion.</p><div class="variablelist"><dl class="variablelist"><dt><span class="term">Distrusted</span></dt><dd><p>The trust assertion marks the subject as explicitly
+						distrusted. This overrides other trust.</p></dd><dt><span class="term">Trusted</span></dt><dd><p>The trust assertion marks the subject as explicitly
+						trusted.</p></dd><dt><span class="term">Anchor</span></dt><dd><p>The trust assertion marks the subject as trusted to
+						confer its trust (eg: via signatures) on other subjects
+						(eg: via a certificate chain).</p></dd></dl></div><p>We can call trust assertions which establish trust <span class="emphasis"><em>positive trust
+				assertions</em></span>. In essence these trust assertions build up trust in
+				a subject. These have a level of trust of <span class="emphasis"><em>trusted</em></span>
+				or <span class="emphasis"><em>anchor</em></span>. Examples of this kind of trust assertion
+				are certificate authority trust anchors.</p><p>Trust assertions that falsify trust can be called <span class="emphasis"><em>negative trust
+				assertions</em></span>. These trust assertions tear down trust in a subject. They
+				assume the subject is already trusted, and want to revoke or falsify
+				that trust. These have a level of trust of <span class="emphasis"><em>distrusted</em></span>.
+				Examples of this kind of trust assertion are certificate revocation lists.</p><p>Negative trust assertions always override positive trust assertions.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="trust-purpose"></a>Purpose</h3></div></div></div><p>A trust assertion always refers to a specific purpose or usage. This is
+				the thing that the subject is trusted to do. For example a certificate
+				may be trusted for purposes like: email, code signing, or authenticating
+				a remote host.</p><p>In addition, the purpose can contain a peer, which further narrows what the
+				subject is trusted to do. It is then only trusted for for the given purpose
+				when the given peer is involved. For example the peer might be the host
+				name of a server.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="trust-subject"></a>Subject Reference</h3></div></div></div><p>Each trust assertion contains a reference to the subject. This is the thing
+				that is trusted. In this specification we will deal exclusively with
+				X.509 certificates as the subject of trust assertions.</p></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="pkcs11-objects"></a>PKCS#11 Trust Assertion Objects</h2></div></div></div><p>Trust assertions are stored as objects on a PKCS#11 token. Although these are
+			specific to a certificate, they do not need to be stored on the same token as
+			the certificate.</p><p>When represented as PKCS#11 objects, trust assertions become less elegant
+			than the reference + purpose + trust-level triple described above. This is done
+			because of limitations in the PKCS#11 API and also to minimizing the number
+			of PKCS#11 lookups required to use trust assertions.</p><p>There are two ways that a trust assertion refers to a certificate. Certificates
+			used in 'positive' trust assertions are referred to by the complete DER encoding
+			 of the certificate. Certificates used in 'negative' trust assertions are referred
+			to by the DER value of the certificate's issuer field and its serial number.</p><p>Unfortunately, we cannot have a single way to refer to certificates used
+			in both positive and negative trust assertions. For example, referring
+			to a certificate authority trust anchor by its issuer and serial number
+			would be meaningless. And using a full DER value to refer to negative
+			trust assertions would preclude uses such as certificate revocation
+			lists. Therefore different methods must be used to refer to certificates in
+			these different situations. The objects below reflect this.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="common-attributes"></a>Common Trust Assertion Object Attributes</h3></div></div></div><p>First we describe the attributes that all trust assertion objects have in
+				common. All trust assertions are of the class
+				<code class="literal">CKO_X_TRUST_ASSERTION</code>.</p><p>In addition to the following trust assertion attributes, all the stardard
+				PKCS#11 storage object attributes of <code class="literal">CKA_TOKEN</code>,
+				<code class="literal">CKA_PRIVATE</code>, <code class="literal">CKA_MODIFIABLE</code> and
+				<code class="literal">CKA_LABEL</code> may be present.</p><div class="table"><a name="assertion-attributes"></a><p class="title"><b>Table 1. General trust assertion attributes</b></p><div class="table-contents"><table class="table" summary="General trust assertion attributes" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Data Type</th><th>Description</th></tr></thead><tbody><tr><td><code class="literal">CKA_CLASS</code></td><td><code class="literal">CK_OBJECT_CLASS</code></td><td><code class="literal">CKO_X_TRUST_ASSERTION</code></td></tr><tr><td><code class="literal">CKA_X_ASSERTION_TYPE</code></td><td><code class="literal">CK_X_ASSERTION_TYPE</code></td><td>The type of trust assertion. This represents
+								the <a class="link" href="#trust-level" title="Level of Trust">level of trust</a>.
+								See the various
+								<a class="link" href="#assertion-types" title="Table 3. Trust assertion types">assertion types</a>.</td></tr><tr><td><code class="literal">CKA_X_PURPOSE</code></td><td><code class="literal">CK_UTF8_CHAR</code> array</td><td>The string representation of
+								<a class="link" href="#trust-purpose" title="Purpose">the purpose</a>,
+								usually an OID, and often one of the
+								<a class="link" href="#defined-purposes" title="Table 2. Predefined Purposes">predefined purposes</a>.</td></tr></tbody></table></div></div><br class="table-break"><p>The <code class="literal">CKA_X_PURPOSE</code> attribute contains a string which represents
+				the <a class="link" href="#trust-purpose" title="Purpose">purpose of the trust assertion</a>. These are
+				generally OIDs. The following predefined values match those of the
+				<a class="ulink" href="http://www.ietf.org/rfc/rfc5280.txt" target="_top">Extended Key Usage X.509 extension</a>.
+				Other values may be used when interoperability of the trust assertion between multiple
+				applications is not required.</p><p>Applications should ignore trust assertions whose <code class="literal">CKA_X_PURPOSE</code> attribute
+				they do not understand. They should not treat them as negative assertions.</p><div class="table"><a name="defined-purposes"></a><p class="title"><b>Table 2. Predefined Purposes</b></p><div class="table-contents"><table class="table" summary="Predefined Purposes" border="1"><colgroup><col><col></colgroup><thead><tr><th>Value</th><th>Description</th></tr></thead><tbody><tr><td><code class="literal">1.3.6.1.5.5.7.3.1</code></td><td>TLS Server Authentication</td></tr><tr><td><code class="literal">1.3.6.1.5.5.7.3.2</code></td><td>TLS Client Authentication</td></tr><tr><td><code class="literal">1.3.6.1.5.5.7.3.3</code></td><td>Code Signing</td></tr><tr><td><code class="literal">1.3.6.1.5.5.7.3.4</code></td><td>Email Protection</td></tr><tr><td><code class="literal">1.3.6.1.5.5.7.3.8</code></td><td>Time Stamping</td></tr></tbody></table></div></div><br class="table-break"><p>Each different type of trust assertion is represented by a different
+				<code class="literal">CK_X_ASSERTION_TYPE</code> value. These represent the
+				<a class="link" href="#trust-level" title="Level of Trust">level of trust</a>. Each type of trust
+				assertion has additional attributes and is a distinctly different type
+				of PKCS#11 object. The following types are defined.</p><div class="table"><a name="assertion-types"></a><p class="title"><b>Table 3. Trust assertion types</b></p><div class="table-contents"><table class="table" summary="Trust assertion types" border="1"><colgroup><col><col></colgroup><thead><tr><th>Trust Type</th><th>Description</th></tr></thead><tbody><tr><td><code class="literal">CKT_X_ANCHORED_CERTIFICATE</code></td><td>A positive trust assertion that represents a trust
+								anchor which is used as the anchor of a certificate
+								chain.</td></tr><tr><td><code class="literal">CKT_X_PINNED_CERTIFICATE</code></td><td>A positive trust assertion that represents an
+								explicit trust in a certificate.</td></tr><tr><td><code class="literal">CKT_X_DISTRUSTED_CERTIFICATE</code></td><td>A negative trust assertion that represents an
+								explicit distrust in a certificate.</td></tr></tbody></table></div></div><br class="table-break"></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="anchored-attributes"></a>Anchored Certificate Assertion</h3></div></div></div><p>An anchored certificate is a trust assertion which is to be used with a
+				certificate authority that has signed other trusted certificates. It
+				is to be used as the anchor in a
+				<a class="ulink" href="http://www.ietf.org/rfc/rfc5280.txt" target="_top">certificate chain</a>.</p><p>Because it is a positive trust assertion, the certificate is referenced by
+				using the entire DER encoding of the certificate.</p><p>In addition to the following attributes, all the
+				<a class="link" href="#assertion-attributes" title="Table 1. General trust assertion attributes">general trust assertion attributes</a>
+				are present on a anchored certificate trust assertion.</p><div class="table"><a name="id1516"></a><p class="title"><b>Table 4. Anchored Certificate Assertion Attributes</b></p><div class="table-contents"><table class="table" summary="Anchored Certificate Assertion Attributes" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Data Type</th><th>Description</th></tr></thead><tbody><tr><td><code class="literal">CKA_X_ASSERTION_TYPE</code></td><td><code class="literal">CK_X_ASSERTION_TYPE</code></td><td><code class="literal">CKT_X_CERTIFICATE_TRUST_ANCHOR</code></td></tr><tr><td><code class="literal">CKA_X_CERTIFICATE_VALUE</code></td><td>Byte array</td><td>The DER encoding of the certificate.</td></tr></tbody></table></div></div><br class="table-break"></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="pinned-attributes"></a>Pinned Certificate Assertion</h3></div></div></div><p>A pinned certificate is an endpoint certificate (not an authority) which is
+				trusted explicitly. The expectation is that all other trust validation
+				is overridden by this pinned trust.</p><p>Because it is a positive trust assertion, the certificate is referenced by
+				using the entire DER encoding of the certificate.</p><p>All pinned certificate trust assertions have a designated peer with which
+				the pinned certificate assertion is relevant. In the case of the TLS
+				authentication purpose, this is the host name of the peer that is being
+				communicated with. In the case of the email protection purpose this is the
+				email address this certificate is to being used with.</p><p>In addition to the following, all the
+				<a class="link" href="#assertion-attributes" title="Table 1. General trust assertion attributes">general trust assertion attributes</a>
+				are present on a pinned certificate trust assertion.</p><div class="table"><a name="id1544"></a><p class="title"><b>Table 5. Pinned Certificate Assertion Attributes</b></p><div class="table-contents"><table class="table" summary="Pinned Certificate Assertion Attributes" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Data Type</th><th>Description</th></tr></thead><tbody><tr><td><code class="literal">CKA_X_ASSERTION_TYPE</code></td><td><code class="literal">CK_X_ASSERTION_TYPE</code></td><td><code class="literal">CKT_X_PINNED_CERTIFICATE</code></td></tr><tr><td><code class="literal">CKA_X_PEER</code></td><td><code class="literal">CK_UTF8_CHAR</code> array</td><td>The peer part of the purpose.</td></tr><tr><td><code class="literal">CKA_X_CERTIFICATE_VALUE</code></td><td>Byte array</td><td>The DER encoding of the certificate.</td></tr></tbody></table></div></div><br class="table-break"></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="distrusted-attributes"></a>Distrusted Certificate Assertion</h3></div></div></div><p>An distrusted certificate is a trust assertion which signifies the explicit
+				lack of	trust in a certificate. An example of this is an item in a CRL
+				or a certificate explicitly marked as distrusted by a user.</p><p>Because it is a negative trust assertion, the certificate is referenced by
+				a using the issuer and serial number of the certificate in question.</p><p>In addition to the following, all the
+				<a class="link" href="#assertion-attributes" title="Table 1. General trust assertion attributes">general trust assertion attributes</a>
+				are present on a distrusted certificate assertion.</p><div class="table"><a name="id1577"></a><p class="title"><b>Table 6. Distrusted Certificate Assertion Attributes</b></p><div class="table-contents"><table class="table" summary="Distrusted Certificate Assertion Attributes" border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Attribute</th><th>Data Type</th><th>Description</th></tr></thead><tbody><tr><td><code class="literal">CKA_X_ASSERTION_TYPE</code></td><td><code class="literal">CK_X_ASSERTION_TYPE</code></td><td><code class="literal">CKT_X_DISTRUSTED_CERTIFICATE</code></td></tr><tr><td><code class="literal">CKA_ISSUER</code></td><td>Byte array</td><td>DER-encoding of the certificate issuer name</td></tr><tr><td><code class="literal">CKA_SERIAL_NUMBER</code></td><td>Byte array</td><td>DER-encoding of the certificate serial number</td></tr></tbody></table></div></div><br class="table-break"></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="operations"></a>Operations</h2></div></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="operation-build-chain"></a>Building a Certificate Chain</h3></div></div></div><p>During TLS or other certificate verification operations, a
+				<a class="ulink" href="http://www.ietf.org/rfc/rfc5280.txt" target="_top">certificate chain</a>
+				must be built. The certificate chain starts with a endpoint certificate for
+				the peer, and usually ends with a certificate explicitly trusted in some
+				way, such as a certificate authority trust anchor. The certificates in the
+				chain are each in turn signed by the next certificate in the chain.</p><p>Conceptually building a certificate chain has two parts 1) building the chain
+				based on positive trust assertions, and 2) allowing then allowing falsification
+				of all or part of the chain based on negative trust assertions.</p><p>Here is how this is accomplished. For interoperability it is important to perform
+				the following lookups using the attributes described:</p><div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><p>Check if the endpoint certificate has a pinned certificate
+						for the given purpose and peer. If a pinned certificate is found
+						then the certificate chain consists of one certificate and is
+						considered valid at this point.</p><p>To check for pinned certificates, perform a
+						<code class="literal">C_FindObject</code> operation with the following
+						attributes:</p><pre class="programlisting">
+	CKA_CLASS: CKO_X_ASSERTION_TYPE
+	CKA_X_ASSERTION_TYPE: CKT_X_PINNED_CERTIFICATE
+	CKA_X_CERTIFICATE_VALUE: <span class="emphasis"><em>DER encoding of certificate</em></span>
+	CKA_X_PURPOSE: <span class="emphasis"><em>purpose string</em></span>
+	CKA_X_PEER: <span class="emphasis"><em>peer string</em></span>
+	</pre></li><li class="listitem"><p>Use PKCS#11 to find all the certificates necessary for the
+						certificate chain. Often a peer will not send a complete chain
+						and only send its own certificate. Build up the chain using the
+						certificate issuer of each certificate to search for issuing
+						certificates. This is done until a self-signed issuing certificate
+						is found, or an issuing certificate is not found.</p><p>To lookup issuing certificates, perform a
+						<code class="literal">C_FindObject</code> operation with the following
+						attributes:</p><pre class="programlisting">
+	CKA_CLASS: CKO_CERTIFICATE
+	CKA_CERTIFICATE_TYPE: CKC_X_509
+	CKA_SUBJECT: <span class="emphasis"><em>Der encoding of subject of issued certificate</em></span>
+	</pre></li><li class="listitem"><p>Check for an anchored certificate assertion for each certificate
+						in the chain starting from the certificate that signed the
+						endpoint certificate. The endpoint certificate is not considered
+						for a possible anchor. When a anchor is found then the certificate
+						chain is truncated at that point. Certificates past the trust anchor
+						are ignored.</p><p>To check for anchored certificates, perform a
+						<code class="literal">C_FindObject</code> operation with the following
+						attributes:</p><pre class="programlisting">
+	CKA_CLASS: CKO_X_ASSERTION_TYPE
+	CKA_X_ASSERTION_TYPE: CKT_X_ANCHORED_CERTIFICATE
+	CKA_X_CERTIFICATE_VALUE: <span class="emphasis"><em>DER encoding of certificate</em></span>
+	CKA_X_PURPOSE: <span class="emphasis"><em>purpose string</em></span>
+	</pre></li><li class="listitem"><p>Allow falsification for each certificate in the resulting
+						certificate chain by checking whether each certificate has
+						an distrusted certificate assertion. If at any point an distrusted
+						assertion is found (eg: a certificate listed on a certificate
+						revocation list) then the certificate chain is considered invalid.</p><p>To check for distrusted certificates, perform a
+						<code class="literal">C_FindObject</code> operation with the following
+						attributes:</p><pre class="programlisting">
+	CKA_CLASS: CKO_X_ASSERTION_TYPE
+	CKA_X_ASSERTION_TYPE: CKT_X_DISTRUSTED_CERTIFICATE
+	CKA_X_CERTIFICATE_VALUE: <span class="emphasis"><em>DER encoding of certificate</em></span>
+	CKA_X_PURPOSE: <span class="emphasis"><em>purpose string</em></span>
+	</pre></li><li class="listitem"><p>Pass the resulting certificate chain to the crypto library for
+						further validation of signers, identity matching, etc.</p></li></ol></div></div></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="justifications"></a>Justifications</h2></div></div></div><p>Some answers to why this spec was designed as it is.</p><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="justification-why-no-hash"></a>Why use a complete certificate DER encoding for positive trust assertions?</h3></div></div></div><p>Conceivably we could use a hash of the certificate instead of the
+				<code class="literal">CKA_X_CERTIFICATE_VALUE</code>.
+				<a class="ulink" href="https://developer.mozilla.org/en/NSS/PKCS_%2311_Netscape_Trust" target="_top">
+				NSS Trust Objects</a> use hashes in this way.</p><p>In the current climate where many hash algorithms are broken in various ways
+				it seems prudent to avoid the hashing of the certificate and just use the
+				complete certificate DER encoding for lookups. This allows a robust standard
+				that is not dependent on the long term viability of a specific hash algorithm.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="justification-why-issuer-serial"></a>Why refer to certificates in negative trust assertions by issuer and serial number?</h3></div></div></div><p><a class="ulink" href="http://www.ietf.org/rfc/rfc5280.txt" target="_top">Certificate revocation lists</a>
+				do not generally contain the full value of the certificate or a hash thereof.
+				They simply contain serial numbers, which when combined with the issuer of the
+				certificate revocation list, are meant to uniquely identify a given certificate.</p><p>In order to support CRLs exposed as distrusted certificate assertions (which is one
+				of the design goals of this specification) we must limit ourselves to this method
+				of referencing certificates in negative trust assertions.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="justification-why-not-nss"></a>Why not use NSS Trust Objects?</h3></div></div></div><p>NSS contains an implementation of storing trust information via PKCS#11.
+				This has not been completely documented, but an
+				<a class="ulink" href="https://developer.mozilla.org/en/NSS/PKCS_%2311_Netscape_Trust" target="_top">
+				overview is available</a>. This method of storing trust information
+				has been in use by NSS for many years.</p><p>However the NSS method is starting to show its age. After study of NSS's
+				method of storing trust information, and discussion with others, the
+				following inherent problems are apparent.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Mandates the use SHA1 and MD5 hashes both of which are
+					cryptographically broken in various way. Neither
+					<a class="ulink" href="http://tools.ietf.org/html/draft-turner-md5-seccon-update-07" target="_top">
+					MD5</a> or
+					<a class="ulink" href="https://tools.ietf.org/html/draft-turner-sha0-sha1-seccon-00" target="_top">
+					SHA1</a> are currently recommended for use in specifications.</p></li><li class="listitem"><p>Only supports a distinct set of purposes, new purposes are
+					not supported.</p></li><li class="listitem"><p>Does not support a storage of a peer along with the purpose, which
+					precludes storage of pinned certificate assertions.</p></li><li class="listitem"><p>Objects represent a number of trust assertions stored in a single PKCS#11
+					object leading to more complex lookup and modification operations.</p></li></ul></div></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="justification-why-not-uris"></a>Why not use PKCS#11 URIs?</h3></div></div></div><p>The <a class="ulink" href="http://tools.ietf.org/html/draft-pechanec-pkcs11uri-03" target="_top">PKCS#11 URI Scheme</a>
+				is a useful draft standard which can be used to identify objects stored on a PKCS#11
+				token. It has been suggested that a list of PKCS#11 URIs could be used to identify
+				which certificates are useful as certificate anchors.</p><p>As outlined above, positive trust assertions build up trust. Certificates used in positive
+				trust assertions must be identified by the certificate value or a hash thereof. PKCS#11
+				URIs do not have the ability to uniquely identify a certificate by its DER encoding or a
+				hash thereof.</p></div><div class="section"><div class="titlepage"><div><div><h3 class="title"><a name="justification-why-cka-trusted"></a>How is this related to CKA_TRUSTED?</h3></div></div></div><p>Later versions of the PKCS#11 spec contain an attribute called <code class="literal">CKA_TRUSTED</code>.
+				This attribute can be set on public keys, secret keys, and certificates by an application
+				as a flag indicating trust in some form. <code class="literal">CKA_TRUSTED</code> can be used as a
+				crude form of marking which certificates can be used as a certificate authority trust
+				anchor.</p><p>We see this specification as complementary to <code class="literal">CKA_TRUSTED</code>. This specification
+				defines a fine grained method for representing all sorts of positive and negative trust
+				assertions, and not just anchored certificates.</p></div></div></div></body></html>

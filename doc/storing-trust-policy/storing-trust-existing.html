@@ -1,0 +1,118 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Existing Trust Storage Implementations</title><link rel="stylesheet" type="text/css" href="style.css"><meta name="generator" content="DocBook XSL Stylesheets Vsnapshot"><link rel="home" href="index.html" title="Storing Trust Policy"><link rel="up" href="index.html" title="Storing Trust Policy"><link rel="prev" href="storing-trust-retrofit.html" title="Retrofiting Existing Implementations"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Existing Trust Storage Implementations</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="storing-trust-retrofit.html">Prev</a> </td><th width="60%" align="center"> </th><td width="20%" align="right"> </td></tr></table><hr></div><div class="article"><div class="titlepage"><div><div><h1 class="title"><a name="storing-trust-existing"></a>Existing Trust Storage Implementations</h1></div></div><hr></div><div class="toc"><dl class="toc"><dt><span class="sect1"><a href="storing-trust-existing.html#nss-trust-objects">1. NSS Trust Objects</a></span></dt><dt><span class="sect1"><a href="storing-trust-existing.html#openssl-trusted">2. OpenSSL Trusted Certificates</a></span></dt><dt><span class="sect1"><a href="storing-trust-existing.html#trust-assertions">3. Trust Assertions</a></span></dt><dt><span class="sect1"><a href="storing-trust-existing.html#ca-bundles">4. Certificate Authority Bundles</a></span></dt></dl></div><p>Obviously if a comprehensive, future-proof and realistic standard
+		representation of out-of-band trust policy exists, we should not define a
+		new representation for Linux. Instead we should gather around it. So let's
+		examine	the various representations in use, and why they are insufficient
+		to provide such a comprehensive standard.</p><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="nss-trust-objects"></a>1. NSS Trust Objects</h2></div></div></div><p>Internally NSS represents out-of-band trust policy using PKCS#11
+		trust objects. These are not well documented
+			<a href="#ftn.id1842" class="footnote" name="id1842"><sup class="footnote">[5]</sup></a>
+		so an attempt will be made to describe them here.</p><p>Each NSS trust object contains the following attributes
+			<a href="#ftn.id1846" class="footnote" name="id1846"><sup class="footnote">[6]</sup></a>
+			used to find the the trust object that applies to a given X.509
+			certificate:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">CKA_CLASS</code></span></dt><dd><p><code class="literal">CKO_NSS_TRUST</code></p></dd><dt><span class="term"><code class="literal">CKA_CERT_SHA1_HASH</code></span></dt><dd><p>A SHA1 hash of the DER encoded X.509
+				certificate to which this trust object's policy
+				applies.</p></dd><dt><span class="term"><code class="literal">CKA_CERT_MD5_HASH</code></span></dt><dd><p>An MD5 hash of the DER encoded X.509
+				certificate to which this trust object's policy
+				applies.</p></dd><dt><span class="term"><code class="literal">CKA_ISSUER</code></span></dt><dd><p>The DER encoding of the issuer of the
+				X.509 certificate to which trust object's policy
+				applies.</p></dd><dt><span class="term"><code class="literal">CKA_SUBJECT</code></span></dt><dd><p>The DER encoding of the subject of the
+				X.509 certificate to which trust object's policy
+				applies.</p></dd><dt><span class="term"><code class="literal">CKA_SERIAL_NUMBER</code></span></dt><dd><p>The DER encoding of the serial number of the
+				X.509 certificate to which trust object's policy
+				applies.</p></dd></dl></div><p>The NSS trust object then contains the following usage attributes.
+			Together these roughly represent the KeyUsage and ExtendedKeyUsage
+			certificate extensions, as out-of-band trust policy. The names should be
+			self explanatory for readers familiar with those certifiacte
+			extensions.</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><code class="literal">CKA_TRUST_DIGITAL_SIGNATURE</code></p></li><li class="listitem"><p><code class="literal">CKA_TRUST_NON_REPUDIATION</code></p></li><li class="listitem"><p><code class="literal">CKA_TRUST_KEY_ENCIPHERMENT</code></p></li><li class="listitem"><p><code class="literal">CKA_TRUST_DATA_ENCIPHERMENT</code></p></li><li class="listitem"><p><code class="literal">CKA_TRUST_KEY_AGREEMENT</code></p></li><li class="listitem"><p><code class="literal">CKA_TRUST_KEY_CERT_SIGN</code></p></li><li class="listitem"><p><code class="literal">CKA_TRUST_CRL_SIGN</code></p></li><li class="listitem"><p><code class="literal">CKA_TRUST_SERVER_AUTH</code></p></li><li class="listitem"><p><code class="literal">CKA_TRUST_CLIENT_AUTH</code></p></li><li class="listitem"><p><code class="literal">CKA_TRUST_CODE_SIGNING</code></p></li><li class="listitem"><p><code class="literal">CKA_TRUST_EMAIL_PROTECTION</code></p></li></ul></div><p>The above usage attributes each can contain a trust setting, one of the
+			following:</p><div class="variablelist"><dl class="variablelist"><dt><span class="term"><code class="literal">CKT_NSS_TRUSTED</code></span></dt><dd><p>The certificate is trusted for this
+				usage.</p></dd><dt><span class="term"><code class="literal">CKT_NSS_TRUSTED_DELEGATOR</code></span></dt><dd><p>The certificate is trusted anchor as a certificate
+				authority for the usages.</p><p>In NSS the trusted anchor does not have to be
+				self-signed. You can explicitly trust an intermediate
+				certificate as if it were a trusted anchor.</p></dd><dt><span class="term"><code class="literal">CKT_NSS_NOT_TRUSTED</code></span></dt><dd><p>This certificate is explicitly not trusted: neither
+				for the given usage, nor as a delegator of the given
+				usage.</p></dd><dt><span class="term"><code class="literal">CKT_NSS_MUST_VERIFY_TRUST</code></span></dt><dd><p>The certificate is not a trusted anchor (even
+				if a later trust record in another PKCS #11 module says
+				this cert should be trusted). If the marked certificate is
+				self-signed, then this is semantically equivalent to
+				<code class="literal">CKT_NSS_NOT_TRUSTED</code>, except NSS will return
+				a different error code (<span class="emphasis"><em>unknown CA</em></span> for
+				<code class="literal">CKT_NSS_MUST_VERIFY_TRUST</code>
+				versus <span class="emphasis"><em>untrusted CA</em></span> for
+				<code class="literal">CKT_NSS_NOT_TRUSTED</code>).</p></dd><dt><span class="term"><code class="literal">CKT_NSS_TRUST_UNKNOWN</code></span></dt><dd><p>This record does not explicitly provide trust one
+				way or the other. If there is another trust record for this
+				cert in another PKCS #11 module, use it.</p></dd></dl></div><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="nss-trust-problems"></a>1.1. Deficiencies</h3></div></div></div><p>NSS trust objects have been around for nearly two decades. They may
+				have been sufficient in the past but are showing their age.</p><p>These trust objects do not seem to be designed as a comprehensive
+				representation of out-of-band trust policy. They are insufficient
+				in the following ways:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>Makes use SHA1 and MD5 hashes both of which are
+				aging cryptographically.</p></li><li class="listitem"><p>Trust objects only support trust policy related to
+				the KeyUsage, ExtendedKeyUsage and parts of the BasicConstraints
+				certificate extensions.</p></li><li class="listitem"><p>Even though the ExtendedKeyUsage certificate extension
+				can support arbitrary usages, the set of usages represented by
+				these trust objects is limited to those defined above. Trust
+				policy for additional usages is awkward to add.</p></li><li class="listitem"><p>Blacklisting is done by marking a certificate as untrusted
+				for specific usages. This works in practice but does not correctly
+				model the reality of having a certificate blacklisted completely
+				and for any usage.</p></li><li class="listitem"><p>Trust objects are a PKCS#11 specific. While PKCS#11 is one
+				acceptable object model for representing out-of-band trust policy,
+				for a standard representation it cannot be the only one.</p></li></ul></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="openssl-trusted"></a>2. OpenSSL Trusted Certificates</h2></div></div></div><p>OpenSSL contains a representation of out-of-band trust policy in its 
+			<code class="literal">TRUSTED CERTIFICATE</code> PEM blocks aka. CertAux.
+			Files containing this information can be manipulated using 
+			its <span class="command"><strong>openssl x509</strong></span> tool.</p><p>It appears that this format is undocumented, so an attempt will be made
+			to document it here.</p><p>PEM files contain a header and footer containing the words
+			<code class="literal">TRUSTED CERTIFICATE</code>. Contained in the PEM
+			data are two DER sequences. The first is an X.509 certificate,
+			and the latter is a structure known internally as <code class="literal">X509_CERT_AUX</code>.</p><p>The <code class="literal">X509_CERT_AUX</code> DER sequence may be defined as follows:
+</p><pre class="programlisting">
+CertAux ::= SEQUENCE {
+      trust      SEQUENCE OF OBJECT IDENTIFIER OPTIONAL,
+      reject     [0] SEQUENCE OF OBJECT IDENTIFIER OPTIONAL,
+      alias      UTF8String OPTIONAL,
+      keyid      OCTET STRING OPTIONAL,
+      other      [1] SEQUENCE OF AlgorithmIdentifier OPTIONAL
+}
+</pre><p>
+		</p><p>The <code class="literal">trust</code> and <code class="literal">reject</code> fields
+			contain sequences of ExtendedKeyUsage object identifiers to
+			trust the certificate to be used for, or to reject usage of the
+			certificate for.</p><p>Together <code class="literal">trust</code> and <code class="literal">reject</code>
+		fields represent out-of-band trust policy representing the
+			ExtendedKeyUsage certificate extension. The other fields are
+			not related to trust policy.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="openssl-trusted-problems"></a>2.1. Deficiencies</h3></div></div></div><p>This representation seems to be designed to solve a specific use
+				case, and not designed as a comprehensive way to represent
+				out-of-band trust policy.  It is insufficient in the following
+				ways:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>This format only supports trust policy related to
+				the ExtendedKeyUsage certificate extension.</p></li><li class="listitem"><p>Blacklisting is done by rejecting a certificate for
+				specific usages. This works in practice but does not correctly
+				model the reality of having a certificate blacklisted completely
+				and for any usage.</p></li><li class="listitem"><p>This format has OpenSSL implementation specific traits.
+				The PEM contents are the concatenation of two DER structures,
+				and though trivially parseable with the OpenSSL DER parser, it
+				is awkward to parse especially when using other and/or strict
+				DER parsers.</p></li></ul></div></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="trust-assertions"></a>3. Trust Assertions</h2></div></div></div><p>Trust Assertions are the author's previous attempt to solve the problem of sharing
+			trust policy information. Details about this are available online
+				<a href="#ftn.id1994" class="footnote" name="id1994"><sup class="footnote">[7]</sup></a>.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="trust-assertion-problems"></a>3.1. Deficiencies</h3></div></div></div><p>Although claiming to solve the problem of out-of-band trust policy
+				in a general way, closer inspection and application to the
+				real world exposed the following problems:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>This concept only supports trust policy related to
+				the ExtendedKeyUsage certificate extension.</p></li><li class="listitem"><p>Blacklisting is done by rejecting a certificate for
+				specific usages. This works in practice but does not correctly
+				model the reality of having a certificate blacklisted completely
+				and for any usage.</p></li><li class="listitem"><p>Although they claim to be general trust assertions were
+				thought out as a PKCS#11 specific concept. While PKCS#11 is one
+				acceptable object model for representing out-of-band trust policy,
+				for a standard representation it cannot be the only one.</p></li></ul></div><p>In addition claims of extensibility and generality proved hard
+				to implement in the real world, and trust assertions ended up
+				as a far more constrained concept that initially envisioned.</p></div></div><div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="ca-bundles"></a>4. Certificate Authority Bundles</h2></div></div></div><p>A bundle is either a file or directory containing one or more X.509
+			certificate authorities. These have been used to represent the possible
+			anchors on a system. These are widely used today.</p><p>They are usually stored in the OpenSSL PEM format, but may also be
+			seen in the Java Keystore format, and others.</p><div class="sect2"><div class="titlepage"><div><div><h3 class="title"><a name="ca-bundle-problems"></a>4.1. Deficiencies</h3></div></div></div><p>Although widely used today certificate authority bundles have
+				the following deficiencies as a standard representation of
+				trust policy:</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p>There is no standard way to represent out-of-band
+				trust policy in addition to the policy contained in the
+				certificate extensions. In theory one could create different
+				bundles for certificate authorities trusted for different
+				usages and circumstances, but this quickly gets out of
+				hand.</p></li><li class="listitem"><p>There is no concept of blacklisting in a such a bundle
+				bundle. One can remove a certificate from the bundle, but if
+				that certificate is used in the middle of a certificate chain
+				rather than as an anchor, the certificate validation will
+				not respect such a removal.</p></li></ul></div></div></div><div class="footnotes"><br><hr style="width:100; text-align:left;margin-left: 0"><div id="ftn.id1842" class="footnote"><p><a href="#id1842" class="para"><sup class="para">[5] </sup></a>Although one can see them in the NSS source code
+				<a class="ulink" href="http://mxr.mozilla.org/seamonkey/source//security/nss/lib/ckfw/builtins/certdata.txt?raw=1" target="_top">certdata.txt</a> file in all their glory.</p></div><div id="ftn.id1846" class="footnote"><p><a href="#id1846" class="para"><sup class="para">[6] </sup></a>In addition to standard PKCS#11 object attributes</p></div><div id="ftn.id1994" class="footnote"><p><a href="#id1994" class="para"><sup class="para">[7] </sup></a><a class="ulink" href="../pkcs11-trust-assertions/" target="_top">Storing Trust Assertions in PKCS#11 Modules</a></p></div></div></div><div class="navfooter"><hr><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="storing-trust-retrofit.html">Prev</a> </td><td width="20%" align="center"> </td><td width="40%" align="right"> </td></tr><tr><td width="40%" align="left" valign="top">Retrofiting Existing Implementations </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> </td></tr></table></div></body></html>

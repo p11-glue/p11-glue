@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="style.css" rel="stylesheet" type="text/css" media="screen" /><title>p11-kit</title>
+</head>
+<body>
+<div id="header-wrapper">
+	<div id="header">
+		<div id="menu">
+			<ul>
+				<li><a href="http://www.freedesktop.org/" class="first">FreeDesktop.org</a></li>
+				<li><a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">Mailing List</a></li>
+				<li><a href="/p11-glue">About</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+<!-- end #header -->
+<!-- end #header-wrapper -->
+<div id="logo">
+	<h1><a href="/p11-glue">p11-glue</a></h1>
+	<p><em>using PKCS#11 to unite crypto libraries</em></p>
+</div>
+<hr />
+<!-- end #logo -->
+<div id="page"><div id="page-bgtop">
+
+	<div id="sidebar">
+	
+	
+	</div>
+
+	<div id="content">
+	
+<h1>Project: p11-kit</h1>
+
+<p>Provides a way to load and enumerate PKCS#11 modules. Provides a standard
+configuration setup for installing PKCS#11 modules in such a way that they're
+discoverable.</p>
+
+<p>Also solves problems with coordinating the use of PKCS#11 by different
+components or libraries living in the same process.</p>
+
+<h2>Implementations and Integration</h2>
+
+<ul>
+	<li>Drop in compatible with any application or library that can use
+		PKCS#11 modules. Some additional benefits are gained from
+		integrating directly.</li>
+	<li><a href="http://library.gnome.org/devel/glib/">Glib Library</a>
+		<a href="xxx">GTlsDatabase PKCS#11 database</a>: Will use p11-kit to load PKCS#11 modules, and
+		load configuration (In progress).</li>
+	<li><a href="http://library.gnome.org/devel/gck/unstable/">Gck Library</a>: Use p11-kit to load
+		and enumerate PKCS#11 modules. Use p11-kit to parse PKCS#11 URIs (In progress).</li>
+	<li><a href="http://library.gnome.org/devel/gcr/unstable/">Gcr Library</a>: Use p11-kit to load
+		configuration for looking up and storing trust assertions (In progress).</li>
+</ul>
+
+<h2>Documentation</h2>
+
+<ul>
+	<li><a href="https://p11-glue.github.io/p11-glue/p11-kit/manual/">All Documentation</a></li>
+	<li><a href="https://p11-glue.github.io/p11-glue/p11-kit/manual/reference.html">API Reference</a></li>
+</ul>
+
+<h2>Source Code</h2>
+
+<p>The source code releases are available for download here:<br>
+<a href="https://github.com/p11-glue/p11-kit/releases">https://github.com/p11-glue/p11-kit/releases</a></p>
+
+<p>The release keyring is available for download here:<br>
+<a href="https://p11-glue.github.io/p11-glue/p11-kit/p11-kit-release-keyring.gpg">https://p11-glue.github.io/p11-glue/p11-kit/p11-kit-release-keyring.gpg</a></p>
+
+<p>The source code is available via git, or <a href="https://github.com/p11-glue/p11-kit/">browsable online</a>.</p>
+
+<pre>
+$ git clone https://github.com/p11-glue/p11-kit
+</pre>
+
+<h2>Contributing</h2>
+
+<ul>
+	<li>Mailing list: 
+		<a href="http://lists.freedesktop.org/mailman/listinfo/p11-glue">p11-glue@lists.freedesktop.org</a></li>
+	<li>Bugs:
+		<a href="https://github.com/p11-glue/p11-kit/issues">github issue tracker</a></li>
+	<li>Guide to
+		<a href="https://p11-glue.github.io/p11-glue/p11-kit/manual/devel.html">building, contributor and packaging</a>.</li>
+</ul>
+
+
+	</div>
+
+</div>
+
+	<!-- end #page -->
+	<div id="footer">
+		<p>Design by <a href="http://www.freecsstemplates.org/">Free CSS Templates</a>.</p>
+	</div>
+	<!-- end #footer -->
+</div>
+</body>
+</html>
