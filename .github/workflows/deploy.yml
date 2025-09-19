@@ -20,7 +20,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Pages
+        with:
+          submodules: true
+      - name: Setup pages
         uses: actions/configure-pages@v5
       - name: Build documentation
         run: make
