@@ -22,7 +22,7 @@ specs:
 	ninja -C p11-kit-build p11-kit-doc
 	mkdir -p html/p11-kit
 	cp p11-kit-release-keyring.gpg html/p11-kit
-	rsync -Hvax --exclude doc --exclude p11-kit-build build/doc/manual/html/ html/p11-kit/manual/
+	rsync -Hvax --exclude doc --exclude build p11-kit-build/doc/manual/html/ html/p11-kit/manual/
 	ln -t html -s p11-kit/manual manual || true
 	test -d html/doc || mkdir html/doc
 	rsync -Hvax specs/storing-trust/ html/doc/storing-trust-policy
