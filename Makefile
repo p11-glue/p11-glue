@@ -18,12 +18,15 @@ specs:
 	cmp .p11-kit.stamp-tmp $@ || mv .p11-kit.stamp-tmp $@
 
 .html.stamp: .p11-kit.stamp
-	rm -rf html/*
+	rm -rf html
 	SRCDIR="." python jinja2-build.py
-	cd p11-kit-copy && ./autogen.sh && ./configure --enable-doc && make -j8 && cd ..
+	rm -rf p11-kit-build
+	meson setup -Dgtk_doc=true p11-kit-build p11-kit-copy
+	meson compile -C p11-kit-build
+	ninja -C p11-kit-build p11-kit-doc
 	mkdir -p html/p11-kit
 	cp p11-kit-release-keyring.gpg html/p11-kit
-	rsync -Hvax --exclude doc --exclude build p11-kit-copy/doc/manual/html/ html/p11-kit/manual/
+	rsync -Hvax --exclude doc --exclude p11-kit-build build/doc/manual/html/ html/p11-kit/manual/
 	ln -t html -s p11-kit/manual manual || true
 	test -d html/doc || mkdir html/doc
 	rsync -Hvax specs/storing-trust/ html/doc/storing-trust-policy
